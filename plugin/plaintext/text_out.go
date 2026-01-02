@@ -45,6 +45,9 @@ func (t *TextOut) Output(container lib.Container) error {
 
 		data, err := t.marshalBytes(entry)
 		if err != nil {
+			if strings.Contains(err.Error(), "has no prefix") {
+				continue
+			}
 			return err
 		}
 
