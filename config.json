@@ -50,6 +50,24 @@
       "action": "add",
       "args": {
         "name": "cn",
+        "uri": "https://ispip.clang.cn/all_cn_ipv6.txt",
+        "onlyIPType": "ipv6"
+      }
+    },
+    {
+      "type": "text",
+      "action": "add",
+      "args": {
+        "name": "cn",
+        "uri": "https://ispip.clang.cn/all_cn_ipv6_apnic.txt",
+        "onlyIPType": "ipv6"
+      }
+    },
+    {
+      "type": "text",
+      "action": "add",
+      "args": {
+        "name": "cn",
         "uri": "https://raw.githubusercontent.com/metowolf/iplist/refs/heads/master/data/country/CN.txt",
         "onlyIPType": "ipv4"
       }
