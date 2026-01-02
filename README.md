@@ -10,8 +10,8 @@ This project releases various formats of GeoIP files automatically every Thursda
 
 另外，本项目对 MaxMind 官方 GeoIP 数据做了修改和新增：
 
-- 中国大陆 IPv4 地址数据融合了 [IPIP.net](https://github.com/17mon/china_ip_list/blob/master/china_ip_list.txt) 和 [@gaoyifan/china-operator-ip](https://github.com/gaoyifan/china-operator-ip/blob/ip-lists/china.txt)
-- 中国大陆 IPv6 地址数据使用 [@gaoyifan/china-operator-ip](https://github.com/gaoyifan/china-operator-ip/blob/ip-lists/china6.txt)
+- 中国大陆 IPv4 地址数据融合了 [IPIP.net](https://github.com/17mon/china_ip_list/blob/master/china_ip_list.txt)、[@gaoyifan/china-operator-ip](https://github.com/gaoyifan/china-operator-ip/blob/ip-lists/china.txt)、[Metowolf](https://github.com/metowolf/iplist/blob/master/data/country/CN.txt)、[Clang-IPv4](https://ispip.clang.cn/all_cn.txt) 和 [Clang-IPv4-APNIC](https://ispip.clang.cn/all_cn_apnic.txt)
+- 中国大陆 IPv6 地址数据融合了 [@gaoyifan/china-operator-ip](https://github.com/gaoyifan/china-operator-ip/blob/ip-lists/china6.txt)、[Clang-IPv6](https://ispip.clang.cn/all_cn_ipv6.txt) 和 [Clang-IPv6-APNIC](https://ispip.clang.cn/all_cn_ipv6_apnic.txt)
 - 新增类别（方便有特殊需求的用户使用）：
   - `geoip:cloudflare`（`GEOIP,CLOUDFLARE`）
   - `geoip:cloudfront`（`GEOIP,CLOUDFRONT`）
@@ -107,6 +107,7 @@ This project releases various formats of GeoIP files automatically every Thursda
   ]
 }
 ```
+
 </details>
 
 <details>
@@ -117,6 +118,7 @@ geodata-mode: true
 geox-url:
   geoip: "https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/geoip.dat"
 ```
+
 </details>
 
 <details>
@@ -129,6 +131,7 @@ direct(geoip:cn)
 proxy(geoip:telegram)
 proxy(geoip:us)
 ```
+
 </details>
 
 <details>
@@ -146,6 +149,7 @@ proxy(geoip:us)
   "geoip": "./geoip.dat"
 }
 ```
+
 </details>
 
 ---
@@ -222,6 +226,7 @@ rules:
   - GEOIP,FACEBOOK,policy
   - GEOIP,CN,policy,no-resolve
 ```
+
 </details>
 
 <details>
@@ -233,6 +238,7 @@ geox-url:
   mmdb: "https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country.mmdb"
   asn: "https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/GeoLite2-ASN.mmdb"
 ```
+
 </details>
 
 <details>
@@ -246,6 +252,7 @@ GEOIP,PRIVATE,DIRECT
 GEOIP,FACEBOOK,PROXY
 GEOIP,CN,DIRECT
 ```
+
 </details>
 
 <details>
@@ -259,6 +266,7 @@ GEOIP,PRIVATE,DIRECT
 GEOIP,FACEBOOK,PROXY
 GEOIP,CN,DIRECT
 ```
+
 </details>
 
 <details>
@@ -272,6 +280,7 @@ GEOIP,PRIVATE,policy,no-resolve
 GEOIP,FACEBOOK,policy
 GEOIP,CN,policy,no-resolve
 ```
+
 </details>
 
 ---
@@ -315,6 +324,7 @@ GEOIP,CN,policy,no-resolve
   ]
 }
 ```
+
 </details>
 
 ---
@@ -352,6 +362,7 @@ rules:
   - RULE-SET,cn-cidr,DIRECT
   - RULE-SET,google-cidr,PROXY,no-resolve
 ```
+
 </details>
 
 ---
@@ -389,6 +400,7 @@ rules:
   - RULE-SET,cn-cidr,DIRECT
   - RULE-SET,telegram-cidr,PROXY,no-resolve
 ```
+
 </details>
 
 ---
@@ -410,6 +422,7 @@ RULE-SET,https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/surge/us.txt,REJ
 RULE-SET,https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/surge/cn.txt,DIRECT
 RULE-SET,https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/surge/telegram.txt,PROXY,no-resolve
 ```
+
 </details>
 
 ---
