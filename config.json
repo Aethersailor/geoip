@@ -13,7 +13,9 @@
       "type": "cutter",
       "action": "remove",
       "args": {
-        "wantedList": ["cn"]
+        "wantedList": [
+          "cn"
+        ]
       }
     },
     {
@@ -41,6 +43,33 @@
         "name": "cn",
         "uri": "https://raw.githubusercontent.com/gaoyifan/china-operator-ip/ip-lists/china6.txt",
         "onlyIPType": "ipv6"
+      }
+    },
+    {
+      "type": "text",
+      "action": "add",
+      "args": {
+        "name": "cn",
+        "uri": "https://raw.githubusercontent.com/metowolf/iplist/refs/heads/master/data/country/CN.txt",
+        "onlyIPType": "ipv4"
+      }
+    },
+    {
+      "type": "text",
+      "action": "add",
+      "args": {
+        "name": "cn",
+        "uri": "https://ispip.clang.cn/all_cn.txt",
+        "onlyIPType": "ipv4"
+      }
+    },
+    {
+      "type": "text",
+      "action": "add",
+      "args": {
+        "name": "cn",
+        "uri": "https://ispip.clang.cn/all_cn_apnic.txt",
+        "onlyIPType": "ipv4"
       }
     },
     {
@@ -81,7 +110,10 @@
       "args": {
         "name": "google",
         "uri": "https://www.gstatic.com/ipranges/goog.json",
-        "jsonPath": ["prefixes.#.ipv4Prefix", "prefixes.#.ipv6Prefix"]
+        "jsonPath": [
+          "prefixes.#.ipv4Prefix",
+          "prefixes.#.ipv6Prefix"
+        ]
       }
     },
     {
@@ -90,7 +122,10 @@
       "args": {
         "name": "google",
         "uri": "https://www.gstatic.com/ipranges/cloud.json",
-        "jsonPath": ["prefixes.#.ipv4Prefix", "prefixes.#.ipv6Prefix"]
+        "jsonPath": [
+          "prefixes.#.ipv4Prefix",
+          "prefixes.#.ipv6Prefix"
+        ]
       }
     },
     {
@@ -99,7 +134,10 @@
       "args": {
         "name": "fastly",
         "uri": "https://api.fastly.com/public-ip-list",
-        "jsonPath": ["addresses", "ipv6_addresses"]
+        "jsonPath": [
+          "addresses",
+          "ipv6_addresses"
+        ]
       }
     },
     {
@@ -133,8 +171,15 @@
             "AS13335",
             "AS132892"
           ],
-          "facebook": ["AS63293", "AS54115", "AS32934"],
-          "fastly": ["AS54113", "AS394192"],
+          "facebook": [
+            "AS63293",
+            "AS54115",
+            "AS32934"
+          ],
+          "fastly": [
+            "AS54113",
+            "AS394192"
+          ],
           "google": [
             "AS6432",
             "AS55023",
@@ -167,9 +212,26 @@
             "AS139190",
             "AS139070"
           ],
-          "netflix": ["AS55095", "AS40027", "AS394406", "AS2906"],
-          "telegram": ["AS62041", "AS62014", "AS59930", "AS44907", "AS211157"],
-          "twitter": ["AS8945", "AS63179", "AS54888", "AS35995", "AS13414"]
+          "netflix": [
+            "AS55095",
+            "AS40027",
+            "AS394406",
+            "AS2906"
+          ],
+          "telegram": [
+            "AS62041",
+            "AS62014",
+            "AS59930",
+            "AS44907",
+            "AS211157"
+          ],
+          "twitter": [
+            "AS8945",
+            "AS63179",
+            "AS54888",
+            "AS35995",
+            "AS13414"
+          ]
         }
       }
     },
@@ -193,7 +255,10 @@
       "args": {
         "outputDir": "./output",
         "outputName": "geoip-only-cn-private.dat",
-        "wantedList": ["cn", "private"]
+        "wantedList": [
+          "cn",
+          "private"
+        ]
       }
     },
     {
@@ -221,7 +286,10 @@
       "args": {
         "outputDir": "./output",
         "oneFilePerList": true,
-        "wantedList": ["cn", "private"]
+        "wantedList": [
+          "cn",
+          "private"
+        ]
       }
     },
     {
@@ -260,7 +328,10 @@
         "outputDir": "./output",
         "outputName": "Country-without-asn.mmdb",
         "sourceMMDBURI": "./output/GeoLite2-Country.mmdb",
-        "overwriteList": ["cn", "private"],
+        "overwriteList": [
+          "cn",
+          "private"
+        ],
         "excludedList": [
           "cloudflare",
           "cloudfront",
@@ -281,7 +352,10 @@
         "outputDir": "./output",
         "outputName": "Country-only-cn-private.mmdb",
         "sourceMMDBURI": "./output/GeoLite2-Country.mmdb",
-        "wantedList": ["cn", "private"]
+        "wantedList": [
+          "cn",
+          "private"
+        ]
       }
     },
     {
