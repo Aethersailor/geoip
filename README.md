@@ -10,8 +10,8 @@ This project releases various formats of GeoIP files automatically every Thursda
 
 另外，本项目对 MaxMind 官方 GeoIP 数据做了修改和新增：
 
-- 中国大陆 IPv4 地址数据融合了 [IPIP.net](https://github.com/17mon/china_ip_list/blob/master/china_ip_list.txt)、[@gaoyifan/china-operator-ip](https://github.com/gaoyifan/china-operator-ip/blob/ip-lists/china.txt)、[Metowolf](https://github.com/metowolf/iplist/blob/master/data/country/CN.txt)、[Clang-IPv4](https://ispip.clang.cn/all_cn.txt) 和 [Clang-IPv4-APNIC](https://ispip.clang.cn/all_cn_apnic.txt)
-- 中国大陆 IPv6 地址数据融合了 [@gaoyifan/china-operator-ip](https://github.com/gaoyifan/china-operator-ip/blob/ip-lists/china6.txt)、[Clang-IPv6](https://ispip.clang.cn/all_cn_ipv6.txt) 和 [Clang-IPv6-APNIC](https://ispip.clang.cn/all_cn_ipv6_apnic.txt)
+- 中国大陆 IPv4 地址数据融合了 [IPIP.net](https://github.com/17mon/china_ip_list/blob/master/china_ip_list.txt)、[gaoyifan/china-operator-ip](https://github.com/gaoyifan/china-operator-ip/blob/ip-lists/china.txt)、[metowolf/iplist](https://github.com/metowolf/iplist/blob/master/data/country/CN.txt)、[Clang-IPv4](https://ispip.clang.cn/all_cn.txt) 和 [Clang-IPv4-APNIC](https://ispip.clang.cn/all_cn_apnic.txt)
+- 中国大陆 IPv6 地址数据融合了 [gaoyifan/china-operator-ip](https://github.com/gaoyifan/china-operator-ip/blob/ip-lists/china6.txt)、[Clang-IPv6](https://ispip.clang.cn/all_cn_ipv6.txt) 和 [Clang-IPv6-APNIC](https://ispip.clang.cn/all_cn_ipv6_apnic.txt)
 - 新增类别（方便有特殊需求的用户使用）：
   - `geoip:cloudflare`（`GEOIP,CLOUDFLARE`）
   - `geoip:cloudfront`（`GEOIP,CLOUDFRONT`）
