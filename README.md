@@ -1,12 +1,12 @@
 # 简介
 
-本项目每周四自动生成多种格式 GeoIP 文件，同时提供命令行界面（CLI）工具供用户自行定制 GeoIP 文件，包括但不限于 V2Ray `dat` 格式文件 `geoip.dat`、MaxMind `mmdb` 格式文件 `Country.mmdb`、sing-box `SRS` 格式文件、mihomo `MRS` 格式文件、Clash ruleset 和 Surge ruleset。
+本项目每天 00:30（UTC）起每 8 小时自动生成多种格式 GeoIP 文件，同时提供命令行界面（CLI）工具供用户自行定制 GeoIP 文件，包括但不限于 V2Ray `dat` 格式文件 `geoip.dat`、MaxMind `mmdb` 格式文件 `Country.mmdb`、sing-box `SRS` 格式文件、mihomo `MRS` 格式文件、Clash ruleset 和 Surge ruleset。
 
-This project releases various formats of GeoIP files automatically every Thursday, and provides a command line interface(CLI) tool for users to customize their own GeoIP files, including but not limited to V2Ray `dat` format file `geoip.dat`, MaxMind `mmdb` format file `Country.mmdb`, sing-box `SRS` format files, mihomo `MRS` format files, Clash ruleset files and Surge ruleset files.
+This project releases various formats of GeoIP files automatically every 8 hours starting at 00:30 (UTC), and provides a command line interface(CLI) tool for users to customize their own GeoIP files, including but not limited to V2Ray `dat` format file `geoip.dat`, MaxMind `mmdb` format file `Country.mmdb`, sing-box `SRS` format files, mihomo `MRS` format files, Clash ruleset files and Surge ruleset files.
 
 ## 与 MaxMind 官方 GeoIP 数据的区别
 
-本项目默认使用 [MaxMind GeoLite2 Country CSV 数据](https://github.com/Loyalsoldier/geoip/blob/release/GeoLite2-Country-CSV.zip)生成各个国家和地区的 GeoIP 文件。所有可供使用的国家和地区 geoip 类别（如 `geoip:cn`，两位英文字母表示国家和地区），请查看：[https://www.iban.com/country-codes](https://www.iban.com/country-codes)。
+本项目默认使用 [MaxMind GeoLite2 Country CSV 数据](https://github.com/Aethersailor/geoip/blob/release/GeoLite2-Country-CSV.zip)生成各个国家和地区的 GeoIP 文件。所有可供使用的国家和地区 geoip 类别（如 `geoip:cn`，两位英文字母表示国家和地区），请查看：[https://www.iban.com/country-codes](https://www.iban.com/country-codes)。
 
 另外，本项目对 MaxMind 官方 GeoIP 数据做了修改和新增：
 
@@ -25,10 +25,10 @@ This project releases various formats of GeoIP files automatically every Thursda
 
 ## 下载地址与使用方法
 
-本项目发布的所有 GeoIP 文件，请查看 [release 分支](https://github.com/Loyalsoldier/geoip/tree/release)。以下是部分格式 GeoIP 文件的下载地址：
+本项目发布的所有 GeoIP 文件，请查看 [release 分支](https://github.com/Aethersailor/geoip/tree/release)。以下是部分格式 GeoIP 文件的下载地址：
 
-> 如果无法访问域名 `raw.githubusercontent.com`，可以使用第二个地址 `cdn.jsdelivr.net`。
-> 如果无法访问域名 `cdn.jsdelivr.net`，可以将其替换为 `fastly.jsdelivr.net`。
+> 如果无法访问域名 `raw.githubusercontent.com`，可以使用第二个地址 `gcore.jsdelivr.net`。
+> 如果无法访问域名 `gcore.jsdelivr.net`，可以将其替换为 `testingcf.jsdelivr.net`。
 >
 > *.sha256sum 为校验文件。
 
@@ -39,36 +39,46 @@ This project releases various formats of GeoIP files automatically every Thursda
 > 此 dat 格式文件不能用于 Nginx。
 
 - **geoip.dat**：
-  - [https://raw.githubusercontent.com/Loyalsoldier/geoip/release/geoip.dat](https://raw.githubusercontent.com/Loyalsoldier/geoip/release/geoip.dat)
-  - [https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/geoip.dat](https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/geoip.dat)
+  - [https://raw.githubusercontent.com/Aethersailor/geoip/release/geoip.dat](https://raw.githubusercontent.com/Aethersailor/geoip/release/geoip.dat)
+  - [https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/geoip.dat](https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/geoip.dat)
+  - [https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/geoip.dat](https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/geoip.dat)
 - **geoip.dat.sha256sum**：
-  - [https://raw.githubusercontent.com/Loyalsoldier/geoip/release/geoip.dat.sha256sum](https://raw.githubusercontent.com/Loyalsoldier/geoip/release/geoip.dat.sha256sum)
-  - [https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/geoip.dat.sha256sum](https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/geoip.dat.sha256sum)
+  - [https://raw.githubusercontent.com/Aethersailor/geoip/release/geoip.dat.sha256sum](https://raw.githubusercontent.com/Aethersailor/geoip/release/geoip.dat.sha256sum)
+  - [https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/geoip.dat.sha256sum](https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/geoip.dat.sha256sum)
+  - [https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/geoip.dat.sha256sum](https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/geoip.dat.sha256sum)
 - **geoip-only-cn-private.dat**（精简版 GeoIP，只包含 `geoip:cn` 和 `geoip:private`）：
-  - [https://raw.githubusercontent.com/Loyalsoldier/geoip/release/geoip-only-cn-private.dat](https://raw.githubusercontent.com/Loyalsoldier/geoip/release/geoip-only-cn-private.dat)
-  - [https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/geoip-only-cn-private.dat](https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/geoip-only-cn-private.dat)
+  - [https://raw.githubusercontent.com/Aethersailor/geoip/release/geoip-only-cn-private.dat](https://raw.githubusercontent.com/Aethersailor/geoip/release/geoip-only-cn-private.dat)
+  - [https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/geoip-only-cn-private.dat](https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/geoip-only-cn-private.dat)
+  - [https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/geoip-only-cn-private.dat](https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/geoip-only-cn-private.dat)
 - **geoip-only-cn-private.dat.sha256sum**：
-  - [https://raw.githubusercontent.com/Loyalsoldier/geoip/release/geoip-only-cn-private.dat.sha256sum](https://raw.githubusercontent.com/Loyalsoldier/geoip/release/geoip-only-cn-private.dat.sha256sum)
-  - [https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/geoip-only-cn-private.dat.sha256sum](https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/geoip-only-cn-private.dat.sha256sum)
+  - [https://raw.githubusercontent.com/Aethersailor/geoip/release/geoip-only-cn-private.dat.sha256sum](https://raw.githubusercontent.com/Aethersailor/geoip/release/geoip-only-cn-private.dat.sha256sum)
+  - [https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/geoip-only-cn-private.dat.sha256sum](https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/geoip-only-cn-private.dat.sha256sum)
+  - [https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/geoip-only-cn-private.dat.sha256sum](https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/geoip-only-cn-private.dat.sha256sum)
 - **geoip-asn.dat**（精简版 GeoIP，只包含上述新增类别）：
-  - [https://raw.githubusercontent.com/Loyalsoldier/geoip/release/geoip-asn.dat](https://raw.githubusercontent.com/Loyalsoldier/geoip/release/geoip-asn.dat)
-  - [https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/geoip-asn.dat](https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/geoip-asn.dat)
+  - [https://raw.githubusercontent.com/Aethersailor/geoip/release/geoip-asn.dat](https://raw.githubusercontent.com/Aethersailor/geoip/release/geoip-asn.dat)
+  - [https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/geoip-asn.dat](https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/geoip-asn.dat)
+  - [https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/geoip-asn.dat](https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/geoip-asn.dat)
 - **geoip-asn.dat.sha256sum**：
-  - [https://raw.githubusercontent.com/Loyalsoldier/geoip/release/geoip-asn.dat.sha256sum](https://raw.githubusercontent.com/Loyalsoldier/geoip/release/geoip-asn.dat.sha256sum)
-  - [https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/geoip-asn.dat.sha256sum](https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/geoip-asn.dat.sha256sum)
+  - [https://raw.githubusercontent.com/Aethersailor/geoip/release/geoip-asn.dat.sha256sum](https://raw.githubusercontent.com/Aethersailor/geoip/release/geoip-asn.dat.sha256sum)
+  - [https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/geoip-asn.dat.sha256sum](https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/geoip-asn.dat.sha256sum)
+  - [https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/geoip-asn.dat.sha256sum](https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/geoip-asn.dat.sha256sum)
 - **cn.dat**（精简版 GeoIP，只包含 `geoip:cn`）：
-  - [https://raw.githubusercontent.com/Loyalsoldier/geoip/release/cn.dat](https://raw.githubusercontent.com/Loyalsoldier/geoip/release/cn.dat)
-  - [https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/cn.dat](https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/cn.dat)
+  - [https://raw.githubusercontent.com/Aethersailor/geoip/release/cn.dat](https://raw.githubusercontent.com/Aethersailor/geoip/release/cn.dat)
+  - [https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/cn.dat](https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/cn.dat)
+  - [https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/cn.dat](https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/cn.dat)
 - **cn.dat.sha256sum**：
-  - [https://raw.githubusercontent.com/Loyalsoldier/geoip/release/cn.dat.sha256sum](https://raw.githubusercontent.com/Loyalsoldier/geoip/release/cn.dat.sha256sum)
-  - [https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/cn.dat.sha256sum](https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/cn.dat.sha256sum)
+  - [https://raw.githubusercontent.com/Aethersailor/geoip/release/cn.dat.sha256sum](https://raw.githubusercontent.com/Aethersailor/geoip/release/cn.dat.sha256sum)
+  - [https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/cn.dat.sha256sum](https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/cn.dat.sha256sum)
+  - [https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/cn.dat.sha256sum](https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/cn.dat.sha256sum)
 - **private.dat**（精简版 GeoIP，只包含 `geoip:private`）：
-  - [https://raw.githubusercontent.com/Loyalsoldier/geoip/release/private.dat](https://raw.githubusercontent.com/Loyalsoldier/geoip/release/private.dat)
-  - [https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/private.dat](https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/private.dat)
+  - [https://raw.githubusercontent.com/Aethersailor/geoip/release/private.dat](https://raw.githubusercontent.com/Aethersailor/geoip/release/private.dat)
+  - [https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/private.dat](https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/private.dat)
+  - [https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/private.dat](https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/private.dat)
 - **private.dat.sha256sum**：
-  - [https://raw.githubusercontent.com/Loyalsoldier/geoip/release/private.dat.sha256sum](https://raw.githubusercontent.com/Loyalsoldier/geoip/release/private.dat.sha256sum)
-  - [https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/private.dat.sha256sum](https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/private.dat.sha256sum)
-- **所有国家 / 地区 / 新增类别**的 dat 格式文件，请查看本项目 `release` 分支下的 [dat 目录](https://github.com/Loyalsoldier/geoip/tree/release/dat)。
+  - [https://raw.githubusercontent.com/Aethersailor/geoip/release/private.dat.sha256sum](https://raw.githubusercontent.com/Aethersailor/geoip/release/private.dat.sha256sum)
+  - [https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/private.dat.sha256sum](https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/private.dat.sha256sum)
+  - [https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/private.dat.sha256sum](https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/private.dat.sha256sum)
+- **所有国家 / 地区 / 新增类别**的 dat 格式文件，请查看本项目 `release` 分支下的 [dat 目录](https://github.com/Aethersailor/geoip/tree/release/dat)。
 
 #### dat 格式文件使用方法
 
@@ -116,8 +126,11 @@ This project releases various formats of GeoIP files automatically every Thursda
 ```yaml
 geodata-mode: true
 geox-url:
-  geoip: "https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/geoip.dat"
+  geoip: "https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/geoip.dat"
 ```
+
+testingcf 备用地址：
+- https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/geoip.dat
 
 </details>
 
@@ -163,22 +176,26 @@ MaxMind 官方版**国家/地区**类型 mmdb 文件：
 > 适用于 [Nginx](https://nginx.org)，需要配合 [ngx_http_geoip2_module](https://github.com/leev/ngx_http_geoip2_module) 模块使用。
 
 - **GeoLite2-Country.mmdb**：
-  - [https://raw.githubusercontent.com/Loyalsoldier/geoip/release/GeoLite2-Country.mmdb](https://raw.githubusercontent.com/Loyalsoldier/geoip/release/GeoLite2-Country.mmdb)
-  - [https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/GeoLite2-Country.mmdb](https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/GeoLite2-Country.mmdb)
+  - [https://raw.githubusercontent.com/Aethersailor/geoip/release/GeoLite2-Country.mmdb](https://raw.githubusercontent.com/Aethersailor/geoip/release/GeoLite2-Country.mmdb)
+  - [https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/GeoLite2-Country.mmdb](https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/GeoLite2-Country.mmdb)
+  - [https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/GeoLite2-Country.mmdb](https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/GeoLite2-Country.mmdb)
 - **GeoLite2-Country.mmdb.sha256sum**：
-  - [https://raw.githubusercontent.com/Loyalsoldier/geoip/release/GeoLite2-Country.mmdb.sha256sum](https://raw.githubusercontent.com/Loyalsoldier/geoip/release/GeoLite2-Country.mmdb.sha256sum)
-  - [https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/GeoLite2-Country.mmdb.sha256sum](https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/GeoLite2-Country.mmdb.sha256sum)
+  - [https://raw.githubusercontent.com/Aethersailor/geoip/release/GeoLite2-Country.mmdb.sha256sum](https://raw.githubusercontent.com/Aethersailor/geoip/release/GeoLite2-Country.mmdb.sha256sum)
+  - [https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/GeoLite2-Country.mmdb.sha256sum](https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/GeoLite2-Country.mmdb.sha256sum)
+  - [https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/GeoLite2-Country.mmdb.sha256sum](https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/GeoLite2-Country.mmdb.sha256sum)
 
 MaxMind 官方版 **ASN** 类型 mmdb 文件：
 
 > 适用于 [mihomo](https://github.com/MetaCubeX/mihomo/tree/Meta)、[Shadowrocket](https://apps.apple.com/us/app/id932747118)、[Surge](https://nssurge.com)。
 
 - **GeoLite2-ASN.mmdb**：
-  - [https://raw.githubusercontent.com/Loyalsoldier/geoip/release/GeoLite2-ASN.mmdb](https://raw.githubusercontent.com/Loyalsoldier/geoip/release/GeoLite2-ASN.mmdb)
-  - [https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/GeoLite2-ASN.mmdb](https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/GeoLite2-ASN.mmdb)
+  - [https://raw.githubusercontent.com/Aethersailor/geoip/release/GeoLite2-ASN.mmdb](https://raw.githubusercontent.com/Aethersailor/geoip/release/GeoLite2-ASN.mmdb)
+  - [https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/GeoLite2-ASN.mmdb](https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/GeoLite2-ASN.mmdb)
+  - [https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/GeoLite2-ASN.mmdb](https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/GeoLite2-ASN.mmdb)
 - **GeoLite2-ASN.mmdb.sha256sum**：
-  - [https://raw.githubusercontent.com/Loyalsoldier/geoip/release/GeoLite2-ASN.mmdb.sha256sum](https://raw.githubusercontent.com/Loyalsoldier/geoip/release/GeoLite2-ASN.mmdb.sha256sum)
-  - [https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/GeoLite2-ASN.mmdb.sha256sum](https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/GeoLite2-ASN.mmdb.sha256sum)
+  - [https://raw.githubusercontent.com/Aethersailor/geoip/release/GeoLite2-ASN.mmdb.sha256sum](https://raw.githubusercontent.com/Aethersailor/geoip/release/GeoLite2-ASN.mmdb.sha256sum)
+  - [https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/GeoLite2-ASN.mmdb.sha256sum](https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/GeoLite2-ASN.mmdb.sha256sum)
+  - [https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/GeoLite2-ASN.mmdb.sha256sum](https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/GeoLite2-ASN.mmdb.sha256sum)
 
 本项目生成的**国家/地区**类型 mmdb 文件：
 
@@ -189,29 +206,37 @@ MaxMind 官方版 **ASN** 类型 mmdb 文件：
 > **国家/地区**类别保留了 `Continent` 和 `Country` 里的所有字段。**新增类别**和 **geoip:private** 类别只保留了 `Country` 里的 `iso_code`（两位英文字母表示的国家/地区代号）字段。关于 Maxmind 官方 country MMDB 格式文件完整字段，请[查看代码](https://github.com/oschwald/geoip2-golang/blob/576a46d19bb59f32d0215cb43285b8928891b6bc/reader.go#L139-L171)。
 
 - **Country-without-asn.mmdb**（传统版 GeoIP，只包含国家/地区类别，不包含上述新增类别。建议优先使用）：
-  - [https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country-without-asn.mmdb](https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country-without-asn.mmdb)
-  - [https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country-without-asn.mmdb](https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country-without-asn.mmdb)
+  - [https://raw.githubusercontent.com/Aethersailor/geoip/release/Country-without-asn.mmdb](https://raw.githubusercontent.com/Aethersailor/geoip/release/Country-without-asn.mmdb)
+  - [https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/Country-without-asn.mmdb](https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/Country-without-asn.mmdb)
+  - [https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/Country-without-asn.mmdb](https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/Country-without-asn.mmdb)
 - **Country-without-asn.mmdb.sha256sum**：
-  - [https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country-without-asn.mmdb.sha256sum](https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country-without-asn.mmdb.sha256sum)
-  - [https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country-without-asn.mmdb.sha256sum](https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country-without-asn.mmdb.sha256sum)
+  - [https://raw.githubusercontent.com/Aethersailor/geoip/release/Country-without-asn.mmdb.sha256sum](https://raw.githubusercontent.com/Aethersailor/geoip/release/Country-without-asn.mmdb.sha256sum)
+  - [https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/Country-without-asn.mmdb.sha256sum](https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/Country-without-asn.mmdb.sha256sum)
+  - [https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/Country-without-asn.mmdb.sha256sum](https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/Country-without-asn.mmdb.sha256sum)
 - **Country.mmdb**（增强版 GeoIP，包含国家/地区类别，以及上述新增类别。但由于 MaxMind mmdb 格式限制，部分国家/地区类别的 IP 地址数据不如上述 **Country-without-asn.mmdb** 准确）：
-  - [https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb](https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb)
-  - [https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country.mmdb](https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country.mmdb)
+  - [https://raw.githubusercontent.com/Aethersailor/geoip/release/Country.mmdb](https://raw.githubusercontent.com/Aethersailor/geoip/release/Country.mmdb)
+  - [https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/Country.mmdb](https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/Country.mmdb)
+  - [https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/Country.mmdb](https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/Country.mmdb)
 - **Country.mmdb.sha256sum**：
-  - [https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb.sha256sum](https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb.sha256sum)
-  - [https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country.mmdb.sha256sum](https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country.mmdb.sha256sum)
+  - [https://raw.githubusercontent.com/Aethersailor/geoip/release/Country.mmdb.sha256sum](https://raw.githubusercontent.com/Aethersailor/geoip/release/Country.mmdb.sha256sum)
+  - [https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/Country.mmdb.sha256sum](https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/Country.mmdb.sha256sum)
+  - [https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/Country.mmdb.sha256sum](https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/Country.mmdb.sha256sum)
 - **Country-only-cn-private.mmdb**（精简版 GeoIP，只包含 `GEOIP,CN` 和 `GEOIP,PRIVATE`）：
-  - [https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country-only-cn-private.mmdb](https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country-only-cn-private.mmdb)
-  - [https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country-only-cn-private.mmdb](https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country-only-cn-private.mmdb)
+  - [https://raw.githubusercontent.com/Aethersailor/geoip/release/Country-only-cn-private.mmdb](https://raw.githubusercontent.com/Aethersailor/geoip/release/Country-only-cn-private.mmdb)
+  - [https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/Country-only-cn-private.mmdb](https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/Country-only-cn-private.mmdb)
+  - [https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/Country-only-cn-private.mmdb](https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/Country-only-cn-private.mmdb)
 - **Country-only-cn-private.mmdb.sha256sum**：
-  - [https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country-only-cn-private.mmdb.sha256sum](https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country-only-cn-private.mmdb.sha256sum)
-  - [https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country-only-cn-private.mmdb.sha256sum](https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country-only-cn-private.mmdb.sha256sum)
+  - [https://raw.githubusercontent.com/Aethersailor/geoip/release/Country-only-cn-private.mmdb.sha256sum](https://raw.githubusercontent.com/Aethersailor/geoip/release/Country-only-cn-private.mmdb.sha256sum)
+  - [https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/Country-only-cn-private.mmdb.sha256sum](https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/Country-only-cn-private.mmdb.sha256sum)
+  - [https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/Country-only-cn-private.mmdb.sha256sum](https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/Country-only-cn-private.mmdb.sha256sum)
 - **Country-asn.mmdb**（精简版 GeoIP，只包含上述新增类别）：
-  - [https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country-asn.mmdb](https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country-asn.mmdb)
-  - [https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country-asn.mmdb](https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country-asn.mmdb)
+  - [https://raw.githubusercontent.com/Aethersailor/geoip/release/Country-asn.mmdb](https://raw.githubusercontent.com/Aethersailor/geoip/release/Country-asn.mmdb)
+  - [https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/Country-asn.mmdb](https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/Country-asn.mmdb)
+  - [https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/Country-asn.mmdb](https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/Country-asn.mmdb)
 - **Country-asn.mmdb.sha256sum**：
-  - [https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country-asn.mmdb.sha256sum](https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country-asn.mmdb.sha256sum)
-  - [https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country-asn.mmdb.sha256sum](https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country-asn.mmdb.sha256sum)
+  - [https://raw.githubusercontent.com/Aethersailor/geoip/release/Country-asn.mmdb.sha256sum](https://raw.githubusercontent.com/Aethersailor/geoip/release/Country-asn.mmdb.sha256sum)
+  - [https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/Country-asn.mmdb.sha256sum](https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/Country-asn.mmdb.sha256sum)
+  - [https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/Country-asn.mmdb.sha256sum](https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/Country-asn.mmdb.sha256sum)
 
 #### mmdb 格式文件使用方法
 
@@ -235,9 +260,13 @@ rules:
 ```yaml
 geodata-mode: false
 geox-url:
-  mmdb: "https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country.mmdb"
-  asn: "https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/GeoLite2-ASN.mmdb"
+  mmdb: "https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/Country.mmdb"
+  asn: "https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/GeoLite2-ASN.mmdb"
 ```
+
+testingcf 备用地址：
+- https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/Country.mmdb
+- https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/GeoLite2-ASN.mmdb
 
 </details>
 
@@ -289,7 +318,7 @@ GEOIP,CN,policy,no-resolve
 
 > 适用于 [sing-box](https://github.com/SagerNet/sing-box)。
 
-请查看本项目 `release` 分支下的 [srs 目录](https://github.com/Loyalsoldier/geoip/tree/release/srs)。
+请查看本项目 `release` 分支下的 [srs 目录](https://github.com/Aethersailor/geoip/tree/release/srs)。
 
 #### SRS 格式文件使用方法
 
@@ -313,17 +342,21 @@ GEOIP,CN,policy,no-resolve
       "tag": "geoip-cn",
       "type": "remote",
       "format": "binary",
-      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/srs/cn.srs"
+      "url": "https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/srs/cn.srs"
     },
     {
       "tag": "geoip-us",
       "type": "remote",
       "format": "binary",
-      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/srs/us.srs"
+      "url": "https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/srs/us.srs"
     }
   ]
 }
 ```
+
+testingcf 备用地址：
+- https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/srs/cn.srs
+- https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/srs/us.srs
 
 </details>
 
@@ -333,7 +366,7 @@ GEOIP,CN,policy,no-resolve
 
 > 适用于 [mihomo](https://github.com/MetaCubeX/mihomo/tree/Meta)。
 
-请查看本项目 `release` 分支下的 [mrs 目录](https://github.com/Loyalsoldier/geoip/tree/release/mrs)。
+请查看本项目 `release` 分支下的 [mrs 目录](https://github.com/Aethersailor/geoip/tree/release/mrs)。
 
 #### MRS 格式文件使用方法
 
@@ -346,7 +379,7 @@ rule-providers:
     type: http
     behavior: ipcidr
     format: mrs
-    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/mrs/cn.mrs"
+    url: "https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/mrs/cn.mrs"
     path: ./mrs/geoip/cn.mrs
     interval: 86400
 
@@ -354,7 +387,7 @@ rule-providers:
     type: http
     behavior: ipcidr
     format: mrs
-    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/mrs/google.mrs"
+    url: "https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/mrs/google.mrs"
     path: ./mrs/geoip/google.mrs
     interval: 86400
 
@@ -362,6 +395,10 @@ rules:
   - RULE-SET,cn-cidr,DIRECT
   - RULE-SET,google-cidr,PROXY,no-resolve
 ```
+
+testingcf 备用地址：
+- https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/mrs/cn.mrs
+- https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/mrs/google.mrs
 
 </details>
 
@@ -371,7 +408,7 @@ rules:
 
 > 适用于 [Clash Premium](https://github.com/Dreamacro/clash)、[mihomo](https://github.com/MetaCubeX/mihomo/tree/Meta)。
 
-请查看本项目 `release` 分支下的 [clash 目录](https://github.com/Loyalsoldier/geoip/tree/release/clash)。
+请查看本项目 `release` 分支下的 [clash 目录](https://github.com/Aethersailor/geoip/tree/release/clash)。
 
 #### Clash ruleset 使用方法
 
@@ -384,7 +421,7 @@ rule-providers:
     type: http
     behavior: ipcidr
     format: yaml
-    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/clash/ipcidr/cn.txt"
+    url: "https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/clash/ipcidr/cn.txt"
     path: ./ruleset/ipcidr/cn.yaml
     interval: 86400
 
@@ -392,7 +429,7 @@ rule-providers:
     type: http
     behavior: ipcidr
     format: yaml
-    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/clash/ipcidr/telegram.txt"
+    url: "https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/clash/ipcidr/telegram.txt"
     path: ./ruleset/ipcidr/telegram.yaml
     interval: 86400
 
@@ -400,6 +437,10 @@ rules:
   - RULE-SET,cn-cidr,DIRECT
   - RULE-SET,telegram-cidr,PROXY,no-resolve
 ```
+
+testingcf 备用地址：
+- https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/clash/ipcidr/cn.txt
+- https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/clash/ipcidr/telegram.txt
 
 </details>
 
@@ -409,7 +450,7 @@ rules:
 
 > 适用于 [Surge](https://nssurge.com)。
 
-请查看本项目 `release` 分支下的 [surge 目录](https://github.com/Loyalsoldier/geoip/tree/release/surge)。
+请查看本项目 `release` 分支下的 [surge 目录](https://github.com/Aethersailor/geoip/tree/release/surge)。
 
 #### Surge ruleset 使用方法
 
@@ -418,10 +459,15 @@ rules:
 
 ```conf
 [Rule]
-RULE-SET,https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/surge/us.txt,REJECT
-RULE-SET,https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/surge/cn.txt,DIRECT
-RULE-SET,https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/surge/telegram.txt,PROXY,no-resolve
+RULE-SET,https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/surge/us.txt,REJECT
+RULE-SET,https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/surge/cn.txt,DIRECT
+RULE-SET,https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/surge/telegram.txt,PROXY,no-resolve
 ```
+
+testingcf 备用地址：
+- https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/surge/us.txt
+- https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/surge/cn.txt
+- https://testingcf.jsdelivr.net/gh/Aethersailor/geoip@release/surge/telegram.txt
 
 </details>
 
@@ -429,13 +475,13 @@ RULE-SET,https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/surge/telegram.t
 
 ### 纯文本 txt 格式文件
 
-请查看本项目 `release` 分支下的 [text 目录](https://github.com/Loyalsoldier/geoip/tree/release/text)。
+请查看本项目 `release` 分支下的 [text 目录](https://github.com/Aethersailor/geoip/tree/release/text)。
 
 ---
 
 ### Nginx `allow` 和 `deny` 文件
 
-请查看本项目 `release` 分支下的 [nginx 目录](https://github.com/Loyalsoldier/geoip/tree/release/nginx)。
+请查看本项目 `release` 分支下的 [nginx 目录](https://github.com/Aethersailor/geoip/tree/release/nginx)。
 
 ---
 
@@ -443,18 +489,18 @@ RULE-SET,https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/surge/telegram.t
 
 可通过以下几种方式自行定制 GeoIP 文件：
 
-- **在线生成**：[Fork](https://github.com/Loyalsoldier/geoip/fork) 本仓库后，修改自己仓库内的配置文件 `config.json` 和 GitHub Workflow `.github/workflows/build.yml`
+- **在线生成**：[Fork](https://github.com/Aethersailor/geoip/fork) 本仓库后，修改自己仓库内的配置文件 `config.json` 和 GitHub Workflow `.github/workflows/build.yml`
 - **本地生成**：
   - 安装 [Golang](https://go.dev/dl/) 和 [Git](https://git-scm.com)
-  - 拉取项目代码: `git clone https://github.com/Loyalsoldier/geoip.git`
+  - 拉取项目代码: `git clone https://github.com/Aethersailor/geoip.git`
   - 进入项目根目录：`cd geoip`
   - 修改配置文件 `config.json`
   - 运行代码：`go run ./ convert -c ./config.json`
 
 **特别说明：**
 
-- **在线生成**：[Fork](https://github.com/Loyalsoldier/geoip/fork) 本项目后，如果需要使用 MaxMind GeoLite2 官方数据文件，需要在自己仓库的 **[Settings]** 页面的左侧边栏 **[Secrets and variables]** 下的 **[Actions]** 选项卡页面中添加一个名为 **MAXMIND_GEOLITE2_LICENSE** 的 secret，否则 GitHub Actions 会运行失败。这个 secret 的值为 MaxMind 账号的 LICENSE KEY，需要[**注册 MaxMind 账号**](https://www.maxmind.com/en/geolite2/signup)后，在[**个人账号管理页面**](https://www.maxmind.com/en/account)左侧边栏的 [**Manage License Keys**] 里生成。
-- **本地生成**：如果需要使用 MaxMind 官方 GeoLite2 数据文件，需要提前从 MaxMind 下载，或者从本项目 [release 分支](https://github.com/Loyalsoldier/geoip/tree/release)下载（文件名以 `GeoLite2` 为前缀的文件），并解压缩到名为 `geolite2` 的目录。
+- **在线生成**：[Fork](https://github.com/Aethersailor/geoip/fork) 本项目后，如果需要使用 MaxMind GeoLite2 官方数据文件，需要在自己仓库的 **[Settings]** 页面的左侧边栏 **[Secrets and variables]** 下的 **[Actions]** 选项卡页面中添加一个名为 **MAXMIND_GEOLITE2_LICENSE** 的 secret，否则 GitHub Actions 会运行失败。这个 secret 的值为 MaxMind 账号的 LICENSE KEY，需要[**注册 MaxMind 账号**](https://www.maxmind.com/en/geolite2/signup)后，在[**个人账号管理页面**](https://www.maxmind.com/en/account)左侧边栏的 [**Manage License Keys**] 里生成。
+- **本地生成**：如果需要使用 MaxMind 官方 GeoLite2 数据文件，需要提前从 MaxMind 下载，或者从本项目 [release 分支](https://github.com/Aethersailor/geoip/tree/release)下载（文件名以 `GeoLite2` 为前缀的文件），并解压缩到名为 `geolite2` 的目录。
 
 ### 概念解析
 
@@ -464,7 +510,7 @@ These two concepts are notable: `input` and `output`. The `input` is the data so
 
 ### 支持的格式
 
-关于每种格式所支持的配置选项，查看本项目 [`configuration.md`](https://github.com/Loyalsoldier/geoip/blob/HEAD/configuration.md) 文件。
+关于每种格式所支持的配置选项，查看本项目 [`configuration.md`](https://github.com/Aethersailor/geoip/blob/HEAD/configuration.md) 文件。
 
 支持的 `input` 输入格式：
 
@@ -508,7 +554,7 @@ These two concepts are notable: `input` and `output`. The `input` is the data so
 
 ## CLI 功能展示
 
-可通过 `go install -v github.com/Loyalsoldier/geoip@latest` 直接安装 CLI 工具。
+可通过 `go install -v github.com/Aethersailor/geoip@latest` 直接安装 CLI 工具。
 
 CLI 提供的功能如下：
 
@@ -816,10 +862,10 @@ false
 
 ## License
 
-[CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/) and [GPL-3.0](https://github.com/Loyalsoldier/geoip/blob/master/LICENSE-GPL)
+[CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/) and [GPL-3.0](https://github.com/Aethersailor/geoip/blob/master/LICENSE-GPL)
 
 This product includes GeoLite2 data created by MaxMind, available from [MaxMind](https://www.maxmind.com).
 
 ## 项目 Star 数增长趋势
 
-[![Stargazers over time](https://starchart.cc/Loyalsoldier/geoip.svg)](https://starchart.cc/Loyalsoldier/geoip)
+[![Stargazers over time](https://starchart.cc/Aethersailor/geoip.svg)](https://starchart.cc/Aethersailor/geoip)
