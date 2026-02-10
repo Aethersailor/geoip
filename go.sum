@@ -22,8 +22,8 @@ github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 github.com/sagernet/sing v0.7.18 h1:iZHkaru1/MoHugx3G+9S3WG4owMewKO/KvieE2Pzk4E=
 github.com/sagernet/sing v0.7.18/go.mod h1:ARkL0gM13/Iv5VCZmci/NuoOlePoIsW0m7BWfln/Hak=
-github.com/sagernet/sing-box v1.12.20 h1:5KarG2Q8/8k8VKXN6sywTc0Gs06HKZ4++zu2y4bw9KA=
-github.com/sagernet/sing-box v1.12.20/go.mod h1:ePKI4HpMVy+wtAumZx6pJxwq2ddiwmU+0ZoVteNdTsY=
+github.com/sagernet/sing-box v1.12.21 h1:SyTTag/f/JQmP7/1tTVlbhfKgAzB84sFhocmnwmANB8=
+github.com/sagernet/sing-box v1.12.21/go.mod h1:jjM3DQWWJSMW3U0uv3AxYRjyLnHu/SXN3A6Svex83/w=
 github.com/spf13/cobra v1.10.2 h1:DMTTonx5m65Ic0GOoRY2c16WCbHxOOw6xxezuLaBpcU=
 github.com/spf13/cobra v1.10.2/go.mod h1:7C1pvHqHw5A4vrJfjNwvOdzYu0Gml16OCs2GRiTUUS4=
 github.com/spf13/pflag v1.0.9 h1:9exaQaMOCwffKiiiYk6/BndUBv+iRViNW+4lEMi0PvY=
