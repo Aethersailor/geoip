@@ -3,7 +3,7 @@ package plaintext
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -30,10 +30,12 @@ func newTextIn(iType string, iDesc string, action lib.Action, data json.RawMessa
 	var tmp struct {
 		Name       string     `json:"name"`
 		URI        string     `json:"uri"`
+		URIList    []string   `json:"uriList"`
 		IPOrCIDR   []string   `json:"ipOrCIDR"`
 		InputDir   string     `json:"inputDir"`
 		Want       []string   `json:"wantedList"`
 		OnlyIPType lib.IPType `json:"onlyIPType"`
+		Optional   bool       `json:"optional"`
 
 		JSONPath             []string `json:"jsonPath"`
 		RemovePrefixesInLine []string `json:"removePrefixesInLine"`
@@ -62,11 +64,11 @@ func newTextIn(iType string, iDesc string, action lib.Action, data json.RawMessa
 		if tmp.Name == "" {
 			return nil, fmt.Errorf("❌ [type %s | action %s] missing inputDir or name", iType, action)
 		}
-		if tmp.URI == "" && len(tmp.IPOrCIDR) == 0 {
-			return nil, fmt.Errorf("❌ [type %s | action %s] missing uri or ipOrCIDR", iType, action)
+		if tmp.URI == "" && len(tmp.URIList) == 0 && len(tmp.IPOrCIDR) == 0 {
+			return nil, fmt.Errorf("❌ [type %s | action %s] missing uri or uriList or ipOrCIDR", iType, action)
 		}
-	} else if tmp.Name != "" || tmp.URI != "" || len(tmp.IPOrCIDR) > 0 {
-		return nil, fmt.Errorf("❌ [type %s | action %s] inputDir is not allowed to be used with name or uri or ipOrCIDR", iType, action)
+	} else if tmp.Name != "" || tmp.URI != "" || len(tmp.URIList) > 0 || len(tmp.IPOrCIDR) > 0 {
+		return nil, fmt.Errorf("❌ [type %s | action %s] inputDir is not allowed to be used with name or uri or uriList or ipOrCIDR", iType, action)
 	}
 
 	// Filter want list
@@ -83,10 +85,12 @@ func newTextIn(iType string, iDesc string, action lib.Action, data json.RawMessa
 		Description: iDesc,
 		Name:        tmp.Name,
 		URI:         tmp.URI,
+		URIList:     tmp.URIList,
 		IPOrCIDR:    tmp.IPOrCIDR,
 		InputDir:    tmp.InputDir,
 		Want:        wantList,
 		OnlyIPType:  tmp.OnlyIPType,
+		Optional:    tmp.Optional,
 
 		JSONPath:             tmp.JSONPath,
 		RemovePrefixesInLine: tmp.RemovePrefixesInLine,
@@ -114,24 +118,24 @@ func (t *TextIn) Input(container lib.Container) (lib.Container, error) {
 	case t.InputDir != "":
 		err = t.walkDir(t.InputDir, entries)
 
-	case t.Name != "" && t.URI != "":
-		switch {
-		case strings.HasPrefix(strings.ToLower(t.URI), "http://"), strings.HasPrefix(strings.ToLower(t.URI), "https://"):
-			err = t.walkRemoteFile(t.URI, t.Name, entries)
-		default:
-			err = t.walkLocalFile(t.URI, t.Name, entries)
-		}
+	case t.Name != "" && (t.URI != "" || len(t.URIList) > 0):
+		err = t.walkFileCandidates(t.Name, entries)
 		if err != nil {
-			return nil, err
+			if !t.Optional {
+				return nil, err
+			}
+			log.Printf("⚠️ [type %s | action %s] skip optional source for list %s: %s", t.Type, t.Action, strings.ToUpper(strings.TrimSpace(t.Name)), err)
 		}
 
-		fallthrough
+		if len(t.IPOrCIDR) > 0 {
+			err = t.appendIPOrCIDR(t.IPOrCIDR, t.Name, entries)
+		}
 
 	case t.Name != "" && len(t.IPOrCIDR) > 0:
 		err = t.appendIPOrCIDR(t.IPOrCIDR, t.Name, entries)
 
 	default:
-		return nil, fmt.Errorf("❌ [type %s | action %s] config missing argument inputDir or name or uri or ipOrCIDR", t.Type, t.Action)
+		return nil, fmt.Errorf("❌ [type %s | action %s] config missing argument inputDir or name or uri or uriList or ipOrCIDR", t.Type, t.Action)
 	}
 
 	if err != nil {
@@ -147,6 +151,10 @@ func (t *TextIn) Input(container lib.Container) (lib.Container, error) {
 	}
 
 	if len(entries) == 0 {
+		if t.Optional {
+			log.Printf("⚠️ [type %s | action %s] no entry is generated, skip optional input %s", t.Type, t.Action, strings.ToUpper(strings.TrimSpace(t.Name)))
+			return container, nil
+		}
 		return nil, fmt.Errorf("❌ [type %s | action %s] no entry is generated", t.Type, t.Action)
 	}
 
@@ -185,6 +193,55 @@ func (t *TextIn) walkDir(dir string, entries map[string]*lib.Entry) error {
 	})
 
 	return err
+}
+
+func (t *TextIn) getSourceList() []string {
+	list := make([]string, 0, 1+len(t.URIList))
+	seen := make(map[string]bool, 1+len(t.URIList))
+
+	add := func(source string) {
+		source = strings.TrimSpace(source)
+		if source == "" || seen[source] {
+			return
+		}
+
+		seen[source] = true
+		list = append(list, source)
+	}
+
+	add(t.URI)
+	for _, source := range t.URIList {
+		add(source)
+	}
+
+	return list
+}
+
+func (t *TextIn) walkFile(pathOrURL, name string, entries map[string]*lib.Entry) error {
+	switch {
+	case strings.HasPrefix(strings.ToLower(pathOrURL), "http://"), strings.HasPrefix(strings.ToLower(pathOrURL), "https://"):
+		return t.walkRemoteFile(pathOrURL, name, entries)
+	default:
+		return t.walkLocalFile(pathOrURL, name, entries)
+	}
+}
+
+func (t *TextIn) walkFileCandidates(name string, entries map[string]*lib.Entry) error {
+	sources := t.getSourceList()
+	if len(sources) == 0 {
+		return fmt.Errorf("❌ [type %s | action %s] missing uri or uriList", t.Type, t.Action)
+	}
+
+	lastErr := error(nil)
+	for _, source := range sources {
+		err := t.walkFile(source, name, entries)
+		if err == nil {
+			return nil
+		}
+		lastErr = err
+	}
+
+	return fmt.Errorf("❌ [type %s | action %s] failed to load all sources for %s: %w", t.Type, t.Action, strings.ToUpper(strings.TrimSpace(name)), lastErr)
 }
 
 func (t *TextIn) walkLocalFile(path, name string, entries map[string]*lib.Entry) error {
@@ -232,24 +289,19 @@ func (t *TextIn) walkLocalFile(path, name string, entries map[string]*lib.Entry)
 }
 
 func (t *TextIn) walkRemoteFile(url, name string, entries map[string]*lib.Entry) error {
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("❌ [type %s | action %s] failed to get remote file %s, http status code %d", t.Type, t.Action, url, resp.StatusCode)
-	}
-
 	name = strings.ToUpper(name)
-
 	if len(t.Want) > 0 && !t.Want[name] {
 		return nil
 	}
 
+	reader, err := lib.GetRemoteURLReader(url)
+	if err != nil {
+		return fmt.Errorf("❌ [type %s | action %s] failed to get remote file %s: %w", t.Type, t.Action, url, err)
+	}
+	defer reader.Close()
+
 	entry := lib.NewEntry(name)
-	if err := t.scanFile(resp.Body, entry); err != nil {
+	if err := t.scanFile(reader, entry); err != nil {
 		return err
 	}
 

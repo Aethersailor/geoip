@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"net/http"
 	"os"
 	"strings"
 
@@ -143,17 +142,13 @@ func (g *GeoIPDatIn) walkLocalFile(path string, entries map[string]*lib.Entry) e
 }
 
 func (g *GeoIPDatIn) walkRemoteFile(url string, entries map[string]*lib.Entry) error {
-	resp, err := http.Get(url)
+	reader, err := lib.GetRemoteURLReader(url)
 	if err != nil {
-		return err
+		return fmt.Errorf("❌ [type %s | action %s] failed to get remote file %s: %w", g.Type, g.Action, url, err)
 	}
-	defer resp.Body.Close()
+	defer reader.Close()
 
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("❌ [type %s | action %s] failed to get remote file %s, http status code %d", g.Type, g.Action, url, resp.StatusCode)
-	}
-
-	if err := g.generateEntries(resp.Body, entries); err != nil {
+	if err := g.generateEntries(reader, entries); err != nil {
 		return err
 	}
 

@@ -51,6 +51,11 @@
       "args": {
         "name": "cn",
         "uri": "https://ispip.clang.cn/all_cn_ipv6.txt",
+        "uriList": [
+          "https://raw.githubusercontent.com/Aethersailor/geoip/release/text/cn-ipv6.txt",
+          "https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/text/cn-ipv6.txt"
+        ],
+        "optional": true,
         "onlyIPType": "ipv6"
       }
     },
@@ -60,6 +65,7 @@
       "args": {
         "name": "cn",
         "uri": "https://ispip.clang.cn/all_cn_ipv6_apnic.txt",
+        "optional": true,
         "onlyIPType": "ipv6"
       }
     },
@@ -78,6 +84,11 @@
       "args": {
         "name": "cn",
         "uri": "https://ispip.clang.cn/all_cn.txt",
+        "uriList": [
+          "https://raw.githubusercontent.com/Aethersailor/geoip/release/text/cn-ipv4.txt",
+          "https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/text/cn-ipv4.txt"
+        ],
+        "optional": true,
         "onlyIPType": "ipv4"
       }
     },
@@ -87,6 +98,7 @@
       "args": {
         "name": "cn",
         "uri": "https://ispip.clang.cn/all_cn_apnic.txt",
+        "optional": true,
         "onlyIPType": "ipv4"
       }
     },
@@ -104,7 +116,12 @@
       "action": "add",
       "args": {
         "name": "tor",
-        "uri": "https://check.torproject.org/torbulkexitlist"
+        "uri": "https://check.torproject.org/torbulkexitlist",
+        "uriList": [
+          "https://raw.githubusercontent.com/Aethersailor/geoip/release/text/tor.txt",
+          "https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/text/tor.txt"
+        ],
+        "optional": true
       }
     },
     {
@@ -112,7 +129,12 @@
       "action": "add",
       "args": {
         "name": "cloudflare",
-        "uri": "https://www.cloudflare.com/ips-v4"
+        "uri": "https://www.cloudflare.com/ips-v4",
+        "uriList": [
+          "https://raw.githubusercontent.com/Aethersailor/geoip/release/text/cloudflare-ipv4.txt",
+          "https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/text/cloudflare-ipv4.txt"
+        ],
+        "optional": true
       }
     },
     {
@@ -120,7 +142,12 @@
       "action": "add",
       "args": {
         "name": "cloudflare",
-        "uri": "https://www.cloudflare.com/ips-v6"
+        "uri": "https://www.cloudflare.com/ips-v6",
+        "uriList": [
+          "https://raw.githubusercontent.com/Aethersailor/geoip/release/text/cloudflare-ipv6.txt",
+          "https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/text/cloudflare-ipv6.txt"
+        ],
+        "optional": true
       }
     },
     {
@@ -128,7 +155,12 @@
       "action": "add",
       "args": {
         "name": "telegram",
-        "uri": "https://core.telegram.org/resources/cidr.txt"
+        "uri": "https://core.telegram.org/resources/cidr.txt",
+        "uriList": [
+          "https://raw.githubusercontent.com/Aethersailor/geoip/release/text/telegram.txt",
+          "https://gcore.jsdelivr.net/gh/Aethersailor/geoip@release/text/telegram.txt"
+        ],
+        "optional": true
       }
     },
     {
@@ -137,6 +169,7 @@
       "args": {
         "name": "google",
         "uri": "https://www.gstatic.com/ipranges/goog.json",
+        "optional": true,
         "jsonPath": [
           "prefixes.#.ipv4Prefix",
           "prefixes.#.ipv6Prefix"
@@ -149,6 +182,7 @@
       "args": {
         "name": "google",
         "uri": "https://www.gstatic.com/ipranges/cloud.json",
+        "optional": true,
         "jsonPath": [
           "prefixes.#.ipv4Prefix",
           "prefixes.#.ipv6Prefix"
@@ -161,6 +195,7 @@
       "args": {
         "name": "fastly",
         "uri": "https://api.fastly.com/public-ip-list",
+        "optional": true,
         "jsonPath": [
           "addresses",
           "ipv6_addresses"
@@ -173,6 +208,7 @@
       "args": {
         "name": "cloudfront",
         "uri": "https://ip-ranges.amazonaws.com/ip-ranges.json",
+        "optional": true,
         "jsonPath": [
           "prefixes.#(service==\"CLOUDFRONT\")#.ip_prefix",
           "ipv6_prefixes.#(service==\"CLOUDFRONT\")#.ipv6_prefix"

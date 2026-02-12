@@ -36,10 +36,11 @@ jobs:
       - name: Download GeoLite2 databases
         run: |
           mkdir -p output
-          curl -L "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/GeoLite2-ASN.tar.gz" -o ./output/GeoLite2-ASN.tar.gz
-          curl -L "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/GeoLite2-ASN-CSV.zip" -o ./output/GeoLite2-ASN-CSV.zip
-          curl -L "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/GeoLite2-Country.tar.gz" -o ./output/GeoLite2-Country.tar.gz
-          curl -L "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/GeoLite2-Country-CSV.zip" -o ./output/GeoLite2-Country-CSV.zip
+          curl_opts=(--fail --location --retry 5 --retry-all-errors --retry-delay 3 --connect-timeout 15 --max-time 300)
+          curl "${curl_opts[@]}" "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/GeoLite2-ASN.tar.gz" -o ./output/GeoLite2-ASN.tar.gz
+          curl "${curl_opts[@]}" "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/GeoLite2-ASN-CSV.zip" -o ./output/GeoLite2-ASN-CSV.zip
+          curl "${curl_opts[@]}" "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/GeoLite2-Country.tar.gz" -o ./output/GeoLite2-Country.tar.gz
+          curl "${curl_opts[@]}" "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/GeoLite2-Country-CSV.zip" -o ./output/GeoLite2-Country-CSV.zip
 
       - name: Prepare GeoLite2 databases
         run: |
@@ -59,9 +60,23 @@ jobs:
           cp GeoLite2-ASN-CSV_*/*.csv ./geolite2/
 
       - name: Build geoip files
+        env:
+          GEOIP_HTTP_TIMEOUT: 60s
+          GEOIP_HTTP_MAX_RETRIES: 5
+          GEOIP_HTTP_BACKOFF_BASE: 2s
+          GEOIP_HTTP_BACKOFF_LIMIT: 16s
         run: |
           go build ./
-          ./geoip convert -c ./config.json
+          for i in 1 2 3; do
+            echo "Run convert attempt ${i}/3"
+            if ./geoip convert -c ./config.json; then
+              break
+            fi
+            if [ "$i" -eq 3 ]; then
+              exit 1
+            fi
+            sleep $((i * 20))
+          done
 
       - name: Verify mmdb files
         run: |

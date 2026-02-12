@@ -738,10 +738,12 @@
 - **args**：（必须）
   - **name**：（可选）类别名称。（不能与 `inputDir` 同时使用；需要与 `uri` 或 `ipOrCIDR` 同时使用）
   - **uri**：（可选）纯文本 txt 文件路径，可为本地文件路径或远程 `http`、`https` 文件 URL。（不能与 `inputDir` 同时使用；需要与 `name` 同时使用；可与 `ipOrCIDR` 同时使用）
+  - **uriList**：（可选，数组）备用数据源路径列表（本地文件路径或远程 `http`、`https` 文件 URL）。程序会按顺序尝试，任一成功即停止尝试后续源。（不能与 `inputDir` 同时使用；需要与 `name` 同时使用；可与 `uri`、`ipOrCIDR` 同时使用）
   - **ipOrCIDR**：（可选，数组）纯文本 IP 地址或 CIDR。（不能与 `inputDir` 同时使用；需要与 `name` 同时使用；可与 `uri` 同时使用）
-  - **inputDir**：（可选）需要遍历的输入目录（不遍历子目录）。（遍历的文件名作为类别名称；不能与 `name`、`uri` 和 `ipOrCIDR` 同时使用）
+  - **inputDir**：（可选）需要遍历的输入目录（不遍历子目录）。（遍历的文件名作为类别名称；不能与 `name`、`uri`、`uriList` 和 `ipOrCIDR` 同时使用）
   - **wantedList**：（可选，数组）指定需要的文件。（与 `inputDir` 同时使用）
   - **onlyIPType**：（可选）只处理的 IP 地址类型，值为 `ipv4` 或 `ipv6`
+  - **optional**：（可选，布尔）是否将该输入源视为可选。若该输入源读取失败且 `optional: true`，会记录警告并继续执行后续配置。
   - **removePrefixesInLine**：（可选，数组）每一行需要移除的字符串前缀
   - **removeSuffixesInLine**：（可选，数组）每一行需要移除的字符串后缀
 
@@ -754,6 +756,22 @@
     "uri": "./cn.txt",                            // 读取本地文件 cn.txt 的 IPv4 和 IPv6 地址，并添加到 cn 类别中
     "removePrefixesInLine": ["Host,", "IP-CIDR"], // 从读取的文件中移除多种不同的行前缀
     "removeSuffixesInLine": [",no-resolve"]       // 从读取的文件中移除行后缀
+  }
+}
+```
+
+```jsonc
+{
+  "type": "text",
+  "action": "add", // 添加 IP 地址
+  "args": {
+    "name": "cn",
+    "uri": "https://source-a.example.com/cn.txt", // 主数据源
+    "uriList": [
+      "https://source-b.example.com/cn.txt",       // 备用数据源 1
+      "https://source-c.example.com/cn.txt"        // 备用数据源 2
+    ],
+    "optional": true                               // 所有源都失败时仅告警，不中断流程
   }
 }
 ```
