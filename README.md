@@ -2,7 +2,7 @@
 
 本项目每天 00:30（UTC）起每 8 小时自动生成多种格式 GeoIP 文件，同时提供命令行界面（CLI）工具供用户自行定制 GeoIP 文件，包括但不限于 V2Ray `dat` 格式文件 `geoip.dat`、MaxMind `mmdb` 格式文件 `Country.mmdb`、sing-box `SRS` 格式文件、mihomo `MRS` 格式文件、Clash ruleset 和 Surge ruleset。
 
-This project releases various formats of GeoIP files automatically every 8 小时之前 starting at 00:30 (UTC), 和 provides a command line interface(CLI) tool for users to customize their own GeoIP files, including but not limited to V2Ray `dat` format file `geoip.dat`, MaxMind `mmdb` format file `Country.mmdb`, sing-box `SRS` format files, mihomo `MRS` format files, Clash ruleset files and Surge ruleset files.
+This project releases various formats of GeoIP files automatically every 8 hours starting at 00:30 (UTC), 和 provides a command line interface(CLI) tool for users to customize their own GeoIP files, including but not limited to V2Ray `dat` format file `geoip.dat`, MaxMind `mmdb` format file `Country.mmdb`, sing-box `SRS` format files, mihomo `MRS` format files, Clash ruleset files and Surge ruleset files.
 
 ## 与 MaxMind 官方 GeoIP 数据的区别
 
