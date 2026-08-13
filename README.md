@@ -1,8 +1,8 @@
 # GeoIP 简介 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Aethersailor/geoip) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/Aethersailor/geoip/total?logo=github) ![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/Aethersailor/geoip/latest/total?logo=github) [![jsdelivr stats](https://data.jsdelivr.com/v1/package/gh/Aethersailor/geoip/badge?style=rounded)](https://www.jsdelivr.com/package/gh/Aethersailor/geoip)
 
-本项目每天 00:30（UTC）起每 8 小时自动生成多种格式 GeoIP 文件，同时提供命令行界面（CLI）工具供用户自行定制 GeoIP 文件，包括但不限于 V2Ray `dat` 格式文件 `geoip.dat`、MaxMind `mmdb` 格式文件 `Country.mmdb`、sing-box `SRS` 格式文件、mihomo `MRS` 格式文件、Clash ruleset 和 Surge ruleset。
+本项目每天 00:30（UTC）自动生成多种格式 GeoIP 文件，同时提供命令行界面（CLI）工具供用户自行定制 GeoIP 文件，包括但不限于 V2Ray `dat` 格式文件 `geoip.dat`、MaxMind `mmdb` 格式文件 `Country.mmdb`、sing-box `SRS` 格式文件、mihomo `MRS` 格式文件、Clash ruleset 和 Surge ruleset。
 
-This project releases various formats of GeoIP files automatically every 8 hours starting at 00:30 (UTC), 和 provides a command line interface(CLI) tool for users to customize their own GeoIP files, including but not limited to V2Ray `dat` format file `geoip.dat`, MaxMind `mmdb` format file `Country.mmdb`, sing-box `SRS` format files, mihomo `MRS` format files, Clash ruleset files and Surge ruleset files.
+This project generates multiple GeoIP formats once a day at 00:30 (UTC) and provides a command-line interface (CLI) for custom builds, including V2Ray `dat`, MaxMind `mmdb`, sing-box `SRS`, mihomo `MRS`, Clash rulesets, and Surge rulesets.
 
 ## 与 MaxMind 官方 GeoIP 数据的区别
 
@@ -10,8 +10,11 @@ This project releases various formats of GeoIP files automatically every 8 hours
 
 另外，本项目对 MaxMind 官方 GeoIP 数据做了修改和新增：
 
-- 中国大陆 IPv4 地址数据融合了 [IPIP.net](https://github.com/17mon/china_ip_list/blob/master/china_ip_list.txt)、[gaoyifan/china-operator-ip](https://github.com/gaoyifan/china-operator-ip/blob/ip-lists/china.txt)、[metowolf/iplist](https://github.com/metowolf/iplist/blob/master/data/country/CN.txt)、[Hackl0us/GeoIP2-CN](https://github.com/Hackl0us/GeoIP2-CN/blob/release/CN-ip-cidr.txt)、[Clang-IPv4](https://ispip.clang.cn/all_cn.txt) 和 [Clang-IPv4-APNIC](https://ispip.clang.cn/all_cn_apnic.txt)
-- 中国大陆 IPv6 地址数据融合了 [gaoyifan/china-operator-ip](https://github.com/gaoyifan/china-operator-ip/blob/ip-lists/china6.txt)、[Clang-IPv6](https://ispip.clang.cn/all_cn_ipv6.txt) 和 [Clang-IPv6-APNIC](https://ispip.clang.cn/all_cn_ipv6_apnic.txt)
+- 中国大陆 IPv4 地址数据融合了 [IPIP.net](https://github.com/17mon/china_ip_list/blob/master/china_ip_list.txt)、[gaoyifan/china-operator-ip](https://github.com/gaoyifan/china-operator-ip/blob/ip-lists/china.txt)、[metowolf/iplist](https://github.com/metowolf/iplist/blob/master/data/country/CN.txt)、[Hackl0us/GeoIP2-CN](https://github.com/Hackl0us/GeoIP2-CN/blob/release/CN-ip-cidr.txt)、[Clang-IPv4](https://ispip.clang.cn/all_cn.txt)、[Clang-IPv4-APNIC](https://ispip.clang.cn/all_cn_apnic.txt)、[misakaio/chnroutes2](https://github.com/misakaio/chnroutes2)、[DB-IP Country Lite](https://db-ip.com/db/lite.php) 和 [sapics/ip-location-db](https://github.com/sapics/ip-location-db)
+- 中国大陆 IPv6 地址数据融合了 [gaoyifan/china-operator-ip](https://github.com/gaoyifan/china-operator-ip/blob/ip-lists/china6.txt)、[Clang-IPv6](https://ispip.clang.cn/all_cn_ipv6.txt)、[Clang-IPv6-APNIC](https://ispip.clang.cn/all_cn_ipv6_apnic.txt)、[DB-IP Country Lite](https://db-ip.com/db/lite.php) 和 [sapics/ip-location-db](https://github.com/sapics/ip-location-db)
+- 可选支持 [IPinfo Lite](https://ipinfo.io/developers/ipinfo-lite-database)。仓库配置 `IPINFO_TOKEN` 后才会启用；未配置时会明确标记为 `disabled`，不会影响其他来源
+- 所有来源采用并集提高覆盖面，不要求多来源交叉确认。合并后会统一规范化、去重并折叠为最小 CIDR 集；明显的私有、回环、链路本地、多播和未指定地址会被拒绝
+- 每次构建都会发布 [`source-report.json`](https://raw.githubusercontent.com/Aethersailor/geoip/release/source-report.json)，记录来源状态、许可证、内容哈希、规范化条目数和仅由该来源贡献的地址范围
 - 新增类别（方便有特殊需求的用户使用）：
   - `geoip:cloudflare`（`GEOIP,CLOUDFLARE`）
   - `geoip:cloudfront`（`GEOIP,CLOUDFRONT`）
@@ -22,6 +25,12 @@ This project releases various formats of GeoIP files automatically every 8 hours
   - `geoip:telegram`（`GEOIP,TELEGRAM`）
   - `geoip:twitter`（`GEOIP,TWITTER`）
   - `geoip:tor`（`GEOIP,TOR`）
+
+## 自动更新负载控制
+
+正式工作流只使用一个 GitHub 托管 runner，每天运行一次，并设有 15 分钟硬超时。构建会先完成单元测试、来源审计、所有输出格式的一致性验证和 MMDB 完整性检查。
+
+只有内容清单发生实质变化时，工作流才会更新 `release` 分支、滚动 `latest` Release 和当月快照，并只刷新常用 jsDelivr 路径。无变化时不会推送产物、创建 Release 或刷新 CDN；工作流也不会通过 Actions Artifact 搬运完整产物。
 
 ## 下载地址与使用方法
 
