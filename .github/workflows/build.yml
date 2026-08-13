@@ -154,8 +154,9 @@ jobs:
 
           snapshot="snapshot-$(date -u +%Y%m)"
           if ! gh release view "$snapshot" >/dev/null 2>&1; then
-            gh release create "$snapshot" --target "$GITHUB_SHA" --title "GeoIP snapshot $(date -u +%Y-%m)" --notes "$notes" "${assets[@]}"
+            gh release create "$snapshot" --target "$GITHUB_SHA" --title "GeoIP snapshot $(date -u +%Y-%m)" --notes "$notes" --latest=false "${assets[@]}"
           fi
+          gh release edit latest --latest
 
       - name: Purge changed jsDelivr paths
         if: github.ref == 'refs/heads/master' && steps.changes.outputs.changed == 'true'
