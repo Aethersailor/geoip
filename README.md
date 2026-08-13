@@ -1,8 +1,8 @@
 # GeoIP 简介 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Aethersailor/geoip) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/Aethersailor/geoip/total?logo=github) ![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/Aethersailor/geoip/latest/total?logo=github) [![jsdelivr stats](https://data.jsdelivr.com/v1/package/gh/Aethersailor/geoip/badge?style=rounded)](https://www.jsdelivr.com/package/gh/Aethersailor/geoip)
 
-本项目每天 00:30（UTC）自动生成多种格式 GeoIP 文件，同时提供命令行界面（CLI）工具供用户自行定制 GeoIP 文件，包括但不限于 V2Ray `dat` 格式文件 `geoip.dat`、MaxMind `mmdb` 格式文件 `Country.mmdb`、sing-box `SRS` 格式文件、mihomo `MRS` 格式文件、Clash ruleset 和 Surge ruleset。
+本项目每天在 00:30 和 12:30（UTC，北京时间 08:30 和 20:30）自动生成多种格式 GeoIP 文件，同时提供命令行界面（CLI）工具供用户自行定制 GeoIP 文件，包括但不限于 V2Ray `dat` 格式文件 `geoip.dat`、MaxMind `mmdb` 格式文件 `Country.mmdb`、sing-box `SRS` 格式文件、mihomo `MRS` 格式文件、Clash ruleset 和 Surge ruleset。
 
-This project generates multiple GeoIP formats once a day at 00:30 (UTC) and provides a command-line interface (CLI) for custom builds, including V2Ray `dat`, MaxMind `mmdb`, sing-box `SRS`, mihomo `MRS`, Clash rulesets, and Surge rulesets.
+This project generates multiple GeoIP formats twice daily at 00:30 and 12:30 (UTC) and provides a command-line interface (CLI) for custom builds, including V2Ray `dat`, MaxMind `mmdb`, sing-box `SRS`, mihomo `MRS`, Clash rulesets, and Surge rulesets.
 
 ## 与 MaxMind 官方 GeoIP 数据的区别
 
@@ -28,7 +28,7 @@ This project generates multiple GeoIP formats once a day at 00:30 (UTC) and prov
 
 ## 自动更新负载控制
 
-正式工作流只使用一个 GitHub 托管 runner，每天运行一次，并设有 15 分钟硬超时。构建会先完成单元测试、来源审计、所有输出格式的一致性验证和 MMDB 完整性检查。
+正式工作流只使用一个 GitHub 托管 runner，每天运行两次，并设有 15 分钟硬超时。构建会先完成单元测试、来源审计、所有输出格式的一致性验证和 MMDB 完整性检查。
 
 只有内容清单发生实质变化时，工作流才会更新 `release` 分支、滚动 `latest` Release 和当月快照，并只刷新常用 jsDelivr 路径。无变化时不会推送产物、创建 Release 或刷新 CDN；工作流也不会通过 Actions Artifact 搬运完整产物。
 
