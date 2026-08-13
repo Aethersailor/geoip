@@ -61,6 +61,9 @@ func (c *container) Loop() <-chan *Entry {
 }
 
 func (c *container) Add(entry *Entry, opts ...IgnoreIPOption) error {
+	if entry == nil {
+		return fmt.Errorf("entry is nil")
+	}
 	var ignoreIPType IPType
 	for _, opt := range opts {
 		if opt != nil {
@@ -89,24 +92,36 @@ func (c *container) Add(entry *Entry, opts ...IgnoreIPOption) error {
 		}
 		switch ignoreIPType {
 		case IPv4:
-			if !val.hasIPv6Builder() {
+			if ipv6set != nil && !val.hasIPv6Builder() {
 				val.ipv6Builder = new(netipx.IPSetBuilder)
 			}
-			val.ipv6Builder.AddSet(ipv6set)
+			if ipv6set != nil {
+				val.ipv6Builder.AddSet(ipv6set)
+				val.ipv6Set = nil
+			}
 		case IPv6:
-			if !val.hasIPv4Builder() {
+			if ipv4set != nil && !val.hasIPv4Builder() {
 				val.ipv4Builder = new(netipx.IPSetBuilder)
 			}
-			val.ipv4Builder.AddSet(ipv4set)
+			if ipv4set != nil {
+				val.ipv4Builder.AddSet(ipv4set)
+				val.ipv4Set = nil
+			}
 		default:
-			if !val.hasIPv4Builder() {
+			if ipv4set != nil && !val.hasIPv4Builder() {
 				val.ipv4Builder = new(netipx.IPSetBuilder)
 			}
-			if !val.hasIPv6Builder() {
+			if ipv6set != nil && !val.hasIPv6Builder() {
 				val.ipv6Builder = new(netipx.IPSetBuilder)
 			}
-			val.ipv4Builder.AddSet(ipv4set)
-			val.ipv6Builder.AddSet(ipv6set)
+			if ipv4set != nil {
+				val.ipv4Builder.AddSet(ipv4set)
+				val.ipv4Set = nil
+			}
+			if ipv6set != nil {
+				val.ipv6Builder.AddSet(ipv6set)
+				val.ipv6Set = nil
+			}
 		}
 
 	case false:
@@ -123,6 +138,9 @@ func (c *container) Add(entry *Entry, opts ...IgnoreIPOption) error {
 }
 
 func (c *container) Remove(entry *Entry, rCase CaseRemove, opts ...IgnoreIPOption) error {
+	if entry == nil {
+		return fmt.Errorf("entry is nil")
+	}
 	name := entry.GetName()
 	val, found := c.GetEntry(name)
 	if !found {
@@ -155,32 +173,46 @@ func (c *container) Remove(entry *Entry, rCase CaseRemove, opts ...IgnoreIPOptio
 
 		switch ignoreIPType {
 		case IPv4:
-			if !val.hasIPv6Builder() {
+			if ipv6set != nil && !val.hasIPv6Builder() {
 				val.ipv6Builder = new(netipx.IPSetBuilder)
 			}
-			val.ipv6Builder.RemoveSet(ipv6set)
+			if ipv6set != nil {
+				val.ipv6Builder.RemoveSet(ipv6set)
+				val.ipv6Set = nil
+			}
 		case IPv6:
-			if !val.hasIPv4Builder() {
+			if ipv4set != nil && !val.hasIPv4Builder() {
 				val.ipv4Builder = new(netipx.IPSetBuilder)
 			}
-			val.ipv4Builder.RemoveSet(ipv4set)
+			if ipv4set != nil {
+				val.ipv4Builder.RemoveSet(ipv4set)
+				val.ipv4Set = nil
+			}
 		default:
-			if !val.hasIPv4Builder() {
+			if ipv4set != nil && !val.hasIPv4Builder() {
 				val.ipv4Builder = new(netipx.IPSetBuilder)
 			}
-			if !val.hasIPv6Builder() {
+			if ipv6set != nil && !val.hasIPv6Builder() {
 				val.ipv6Builder = new(netipx.IPSetBuilder)
 			}
-			val.ipv4Builder.RemoveSet(ipv4set)
-			val.ipv6Builder.RemoveSet(ipv6set)
+			if ipv4set != nil {
+				val.ipv4Builder.RemoveSet(ipv4set)
+				val.ipv4Set = nil
+			}
+			if ipv6set != nil {
+				val.ipv6Builder.RemoveSet(ipv6set)
+				val.ipv6Set = nil
+			}
 		}
 
 	case CaseRemoveEntry:
 		switch ignoreIPType {
 		case IPv4:
 			val.ipv6Builder = nil
+			val.ipv6Set = nil
 		case IPv6:
 			val.ipv4Builder = nil
+			val.ipv4Set = nil
 		default:
 			delete(c.entries, name)
 		}
