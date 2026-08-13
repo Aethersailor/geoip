@@ -2,11 +2,13 @@ package maxmind
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net"
 	"os"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/Loyalsoldier/geoip/lib"
@@ -75,8 +77,14 @@ func (g *GeoLite2CountryMMDBOut) Output(container lib.Container) error {
 		recordSize = 32
 	}
 
+	buildEpoch, err := sourceDateEpoch()
+	if err != nil {
+		return err
+	}
+
 	writer, err := mmdbwriter.New(
 		mmdbwriter.Options{
+			BuildEpoch:              buildEpoch,
 			DatabaseType:            dbName,
 			Description:             map[string]string{"en": dbDesc},
 			RecordSize:              recordSize,
@@ -113,6 +121,18 @@ func (g *GeoLite2CountryMMDBOut) Output(container lib.Container) error {
 	}
 
 	return nil
+}
+
+func sourceDateEpoch() (int64, error) {
+	value := strings.TrimSpace(os.Getenv("SOURCE_DATE_EPOCH"))
+	if value == "" {
+		return 0, nil
+	}
+	epoch, err := strconv.ParseInt(value, 10, 64)
+	if err != nil || epoch <= 0 {
+		return 0, fmt.Errorf("invalid SOURCE_DATE_EPOCH %q", value)
+	}
+	return epoch, nil
 }
 
 func (g *GeoLite2CountryMMDBOut) filterAndSortList(container lib.Container) []string {

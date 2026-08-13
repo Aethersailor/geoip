@@ -1,0 +1,120 @@
+{
+  "sources": [
+    {
+      "id": "17mon",
+      "name": "IPIP.net / 17mon",
+      "format": "text",
+      "urls": ["https://raw.githubusercontent.com/17mon/china_ip_list/master/china_ip_list.txt"],
+      "license": "No license file detected upstream",
+      "required": true
+    },
+    {
+      "id": "gaoyifan-ipv4",
+      "name": "gaoyifan/china-operator-ip IPv4",
+      "format": "text",
+      "urls": ["https://raw.githubusercontent.com/gaoyifan/china-operator-ip/ip-lists/china.txt"],
+      "license": "MIT",
+      "required": true
+    },
+    {
+      "id": "gaoyifan-ipv6",
+      "name": "gaoyifan/china-operator-ip IPv6",
+      "format": "text",
+      "urls": ["https://raw.githubusercontent.com/gaoyifan/china-operator-ip/ip-lists/china6.txt"],
+      "license": "MIT",
+      "required": true
+    },
+    {
+      "id": "clang-ipv4",
+      "name": "Clang IPv4",
+      "format": "text",
+      "urls": ["https://ispip.clang.cn/all_cn.txt"],
+      "license": "No license metadata published upstream",
+      "required": false
+    },
+    {
+      "id": "clang-apnic-ipv4",
+      "name": "Clang APNIC IPv4",
+      "format": "text",
+      "urls": ["https://ispip.clang.cn/all_cn_apnic.txt"],
+      "license": "No license metadata published upstream",
+      "required": false
+    },
+    {
+      "id": "clang-ipv6",
+      "name": "Clang IPv6",
+      "format": "text",
+      "urls": ["https://ispip.clang.cn/all_cn_ipv6.txt"],
+      "license": "No license metadata published upstream",
+      "required": false
+    },
+    {
+      "id": "clang-apnic-ipv6",
+      "name": "Clang APNIC IPv6",
+      "format": "text",
+      "urls": ["https://ispip.clang.cn/all_cn_ipv6_apnic.txt"],
+      "license": "No license metadata published upstream",
+      "required": false
+    },
+    {
+      "id": "metowolf",
+      "name": "metowolf/iplist",
+      "format": "text",
+      "urls": ["https://raw.githubusercontent.com/metowolf/iplist/refs/heads/master/data/country/CN.txt"],
+      "license": "No license file detected upstream",
+      "required": true
+    },
+    {
+      "id": "hackl0us",
+      "name": "Hackl0us/GeoIP2-CN",
+      "format": "text",
+      "urls": ["https://raw.githubusercontent.com/Hackl0us/GeoIP2-CN/refs/heads/release/CN-ip-cidr.txt"],
+      "license": "GPL-3.0",
+      "required": true
+    },
+    {
+      "id": "misakaio",
+      "name": "misakaio/chnroutes2",
+      "format": "text",
+      "urls": ["https://raw.githubusercontent.com/misakaio/chnroutes2/master/chnroutes.txt"],
+      "license": "CC BY-SA 4.0",
+      "required": true
+    },
+    {
+      "id": "db-ip",
+      "name": "DB-IP Country Lite",
+      "format": "dbip-mmdb-gzip",
+      "urls": [
+        "https://download.db-ip.com/free/dbip-country-lite-{current-month}.mmdb.gz",
+        "https://download.db-ip.com/free/dbip-country-lite-{previous-month}.mmdb.gz"
+      ],
+      "license": "CC BY 4.0",
+      "required": true
+    },
+    {
+      "id": "sapics-ipv4",
+      "name": "sapics/ip-location-db IPv4",
+      "format": "country-cidr-csv",
+      "urls": ["https://github.com/sapics/ip-location-db/releases/latest/download/user-country-ipv4-cidr.csv"],
+      "license": "PDDL 1.0",
+      "required": true
+    },
+    {
+      "id": "sapics-ipv6",
+      "name": "sapics/ip-location-db IPv6",
+      "format": "country-cidr-csv",
+      "urls": ["https://github.com/sapics/ip-location-db/releases/latest/download/user-country-ipv6-cidr.csv"],
+      "license": "PDDL 1.0",
+      "required": true
+    },
+    {
+      "id": "ipinfo-lite",
+      "name": "IPinfo Lite",
+      "format": "ipinfo-mmdb",
+      "urls": ["https://ipinfo.io/data/ipinfo_lite.mmdb?token={token}"],
+      "license": "CC BY-SA 4.0",
+      "required": false,
+      "tokenEnv": "IPINFO_TOKEN"
+    }
+  ]
+}
