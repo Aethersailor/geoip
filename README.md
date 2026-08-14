@@ -1,5 +1,14 @@
 # GeoIP 简介 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Aethersailor/geoip) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/Aethersailor/geoip/total?logo=github) ![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/Aethersailor/geoip/latest/total?logo=github) [![jsdelivr stats](https://data.jsdelivr.com/v1/package/gh/Aethersailor/geoip/badge?style=rounded)](https://www.jsdelivr.com/package/gh/Aethersailor/geoip)
 
+> [!NOTE]
+> 本项目基于 [Loyalsoldier/geoip](https://github.com/Loyalsoldier/geoip) 构建。在上游 MaxMind GeoLite2 和 [gaoyifan/china-operator-ip](https://github.com/gaoyifan/china-operator-ip) 数据的基础上，本项目为中国大陆 IP 集合额外融合以下可信来源：
+>
+> - IPv4 和 IPv6：[Clang](https://ispip.clang.cn/)、[DB-IP Country Lite](https://db-ip.com/db/lite.php) 和 [sapics/ip-location-db](https://github.com/sapics/ip-location-db)
+> - IPv4：[IPIP.net / 17mon](https://github.com/17mon/china_ip_list)、[metowolf/iplist](https://github.com/metowolf/iplist)、[Hackl0us/GeoIP2-CN](https://github.com/Hackl0us/GeoIP2-CN) 和 [misakaio/chnroutes2](https://github.com/misakaio/chnroutes2)
+> - 可选 IPv4 和 IPv6：[IPinfo Lite](https://ipinfo.io/developers/ipinfo-lite-database)，仅在配置 `IPINFO_TOKEN` 后启用
+>
+> 这些来源采用并集以提高中国大陆 IP 覆盖面，不要求多来源交叉确认。完整来源、许可证、内容哈希和独立贡献记录见 [`source-report.json`](https://raw.githubusercontent.com/Aethersailor/geoip/release/source-report.json)。
+
 本项目每天在 00:30 和 12:30（UTC，北京时间 08:30 和 20:30）自动生成多种格式 GeoIP 文件，同时提供命令行界面（CLI）工具供用户自行定制 GeoIP 文件，包括但不限于 V2Ray `dat` 格式文件 `geoip.dat`、MaxMind `mmdb` 格式文件 `Country.mmdb`、sing-box `SRS` 格式文件、mihomo `MRS` 格式文件、Clash ruleset 和 Surge ruleset。
 
 This project generates multiple GeoIP formats twice daily at 00:30 and 12:30 (UTC) and provides a command-line interface (CLI) for custom builds, including V2Ray `dat`, MaxMind `mmdb`, sing-box `SRS`, mihomo `MRS`, Clash rulesets, and Surge rulesets.
