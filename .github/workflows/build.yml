@@ -157,18 +157,17 @@ jobs:
             --target "$GITHUB_SHA" \
             --title "$release_tag" \
             --notes "$notes" \
-            --latest=false \
+            --latest \
             "${assets[@]}"
 
           git tag -f latest "$GITHUB_SHA"
           git push --force origin refs/tags/latest
           if gh release view latest >/dev/null 2>&1; then
             gh release upload latest "${assets[@]}" --clobber
-            gh release edit latest --title "Latest GeoIP build" --notes "$notes" --latest
+            gh release edit latest --title "Latest GeoIP build" --notes "$notes"
           else
-            gh release create latest --verify-tag --title "Latest GeoIP build" --notes "$notes" --latest "${assets[@]}"
+            gh release create latest --verify-tag --title "Latest GeoIP build" --notes "$notes" --latest=false "${assets[@]}"
           fi
-          gh release edit latest --latest
 
       - name: Purge changed jsDelivr paths
         if: github.ref == 'refs/heads/master' && steps.changes.outputs.changed == 'true'
