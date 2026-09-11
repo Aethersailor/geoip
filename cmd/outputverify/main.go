@@ -46,9 +46,7 @@ func main() {
 
 func run(outputDir, sourceReport string) error {
 	referencePath := filepath.Join(outputDir, "text", "cn.txt")
-	reference, err := loadEntry(&plaintext.TextIn{
-		Type: plaintext.TypeTextIn, Action: lib.ActionAdd, Name: "cn", URI: referencePath,
-	})
+	reference, err := loadEntry(plaintext.TypeTextIn, map[string]any{"name": "cn", "uri": referencePath})
 	if err != nil {
 		return fmt.Errorf("reference CN text: %w", err)
 	}
@@ -74,18 +72,19 @@ func run(outputDir, sourceReport string) error {
 
 	checks := []struct {
 		name      string
-		converter lib.InputConverter
+		inputType string
+		args      map[string]any
 	}{
-		{"Clash classical", &plaintext.TextIn{Type: plaintext.TypeClashRuleSetClassicalIn, Action: lib.ActionAdd, Name: "cn", URI: filepath.Join(outputDir, "clash", "classical", "cn.txt")}},
-		{"Clash IP-CIDR", &plaintext.TextIn{Type: plaintext.TypeClashRuleSetIPCIDRIn, Action: lib.ActionAdd, Name: "cn", URI: filepath.Join(outputDir, "clash", "ipcidr", "cn.txt")}},
-		{"Surge", &plaintext.TextIn{Type: plaintext.TypeSurgeRuleSetIn, Action: lib.ActionAdd, Name: "cn", URI: filepath.Join(outputDir, "surge", "cn.txt")}},
-		{"V2Ray DAT", &v2ray.GeoIPDatIn{Type: v2ray.TypeGeoIPDatIn, Action: lib.ActionAdd, URI: filepath.Join(outputDir, "geoip-only-cn-private.dat"), Want: map[string]bool{"CN": true}}},
-		{"sing-box SRS", &singbox.SRSIn{Type: singbox.TypeSRSIn, Action: lib.ActionAdd, Name: "cn", URI: filepath.Join(outputDir, "srs", "cn.srs")}},
-		{"mihomo MRS", &mihomo.MRSIn{Type: mihomo.TypeMRSIn, Action: lib.ActionAdd, Name: "cn", URI: filepath.Join(outputDir, "mrs", "cn.mrs")}},
-		{"MaxMind MMDB", &maxmind.GeoLite2CountryMMDBIn{Type: maxmind.TypeGeoLite2CountryMMDBIn, Action: lib.ActionAdd, URI: filepath.Join(outputDir, "Country-only-cn-private.mmdb"), Want: map[string]bool{"CN": true}}},
+		{"Clash classical", plaintext.TypeClashRuleSetClassicalIn, map[string]any{"name": "cn", "uri": filepath.Join(outputDir, "clash", "classical", "cn.txt")}},
+		{"Clash IP-CIDR", plaintext.TypeClashRuleSetIPCIDRIn, map[string]any{"name": "cn", "uri": filepath.Join(outputDir, "clash", "ipcidr", "cn.txt")}},
+		{"Surge", plaintext.TypeSurgeRuleSetIn, map[string]any{"name": "cn", "uri": filepath.Join(outputDir, "surge", "cn.txt")}},
+		{"V2Ray DAT", v2ray.TypeGeoIPDatIn, map[string]any{"uri": filepath.Join(outputDir, "geoip-only-cn-private.dat"), "wantedList": []string{"cn"}}},
+		{"sing-box SRS", singbox.TypeSRSIn, map[string]any{"name": "cn", "uri": filepath.Join(outputDir, "srs", "cn.srs")}},
+		{"mihomo MRS", mihomo.TypeMRSIn, map[string]any{"name": "cn", "uri": filepath.Join(outputDir, "mrs", "cn.mrs")}},
+		{"MaxMind MMDB", maxmind.TypeGeoLite2CountryMMDBIn, map[string]any{"uri": filepath.Join(outputDir, "Country-only-cn-private.mmdb"), "wantedList": []string{"cn"}}},
 	}
 	for _, check := range checks {
-		entry, err := loadEntry(check.converter)
+		entry, err := loadEntry(check.inputType, check.args)
 		if err != nil {
 			return fmt.Errorf("%s: %w", check.name, err)
 		}
@@ -123,9 +122,26 @@ func run(outputDir, sourceReport string) error {
 	return nil
 }
 
-func loadEntry(converter lib.InputConverter) (*lib.Entry, error) {
-	container, err := converter.Input(lib.NewContainer())
+func loadEntry(inputType string, args map[string]any) (*lib.Entry, error) {
+	data, err := json.Marshal(map[string]any{
+		"input": []map[string]any{{
+			"type":   inputType,
+			"action": lib.ActionAdd,
+			"args":   args,
+		}},
+	})
 	if err != nil {
+		return nil, err
+	}
+	instance, err := lib.NewInstance()
+	if err != nil {
+		return nil, err
+	}
+	if err := instance.InitConfigFromBytes(data); err != nil {
+		return nil, err
+	}
+	container := lib.NewContainer()
+	if err := instance.RunInput(container); err != nil {
 		return nil, err
 	}
 	entry, ok := container.GetEntry("cn")

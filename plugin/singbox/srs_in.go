@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -119,13 +120,7 @@ func (s *SRSIn) Input(container lib.Container) (lib.Container, error) {
 		return nil, fmt.Errorf("❌ [type %s | action %s] no entry is generated", s.Type, s.Action)
 	}
 
-	var ignoreIPType lib.IgnoreIPOption
-	switch s.OnlyIPType {
-	case lib.IPv4:
-		ignoreIPType = lib.IgnoreIPv6
-	case lib.IPv6:
-		ignoreIPType = lib.IgnoreIPv4
-	}
+	ignoreIPType := lib.GetIgnoreIPType(s.OnlyIPType)
 
 	for _, entry := range entries {
 		switch s.Action {
@@ -203,13 +198,17 @@ func (s *SRSIn) walkLocalFile(path, name string, entries map[string]*lib.Entry) 
 }
 
 func (s *SRSIn) walkRemoteFile(url, name string, entries map[string]*lib.Entry) error {
-	reader, err := lib.GetRemoteURLReader(url)
+	resp, err := http.Get(url)
 	if err != nil {
-		return fmt.Errorf("❌ [type %s | action %s] failed to get remote file %s: %w", s.Type, s.Action, url, err)
+		return err
 	}
-	defer reader.Close()
+	defer resp.Body.Close()
 
-	if err := s.generateEntries(name, reader, entries); err != nil {
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("❌ [type %s | action %s] failed to get remote file %s, http status code %d", s.Type, s.Action, url, resp.StatusCode)
+	}
+
+	if err := s.generateEntries(name, resp.Body, entries); err != nil {
 		return err
 	}
 

@@ -125,13 +125,7 @@ func (g *GeoLite2CountryCSVIn) Input(container lib.Container) (lib.Container, er
 		return nil, fmt.Errorf("❌ [type %s | action %s] no entry is generated", g.Type, g.Action)
 	}
 
-	var ignoreIPType lib.IgnoreIPOption
-	switch g.OnlyIPType {
-	case lib.IPv4:
-		ignoreIPType = lib.IgnoreIPv6
-	case lib.IPv6:
-		ignoreIPType = lib.IgnoreIPv4
-	}
+	ignoreIPType := lib.GetIgnoreIPType(g.OnlyIPType)
 
 	for _, entry := range entries {
 		switch g.Action {
@@ -170,6 +164,9 @@ func (g *GeoLite2CountryCSVIn) getCountryCode() (map[string]string, error) {
 	lines, err := reader.ReadAll()
 	if err != nil {
 		return nil, err
+	}
+	if len(lines) == 0 {
+		return nil, fmt.Errorf("❌ [type %s | action %s] empty country code file: %s", g.Type, g.Action, g.CountryCodeFile)
 	}
 
 	ccMap := make(map[string]string)

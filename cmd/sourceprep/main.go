@@ -13,7 +13,6 @@ import (
 	"fmt"
 	"io"
 	"math/big"
-	"net"
 	"net/http"
 	"net/netip"
 	"net/url"
@@ -22,8 +21,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/oschwald/geoip2-golang"
-	"github.com/oschwald/maxminddb-golang"
+	"github.com/oschwald/geoip2-golang/v2"
+	"github.com/oschwald/maxminddb-golang/v2"
 	"go4.org/netipx"
 )
 
@@ -340,31 +339,29 @@ func parseCountryCIDRCSV(reader io.Reader) (parseResult, error) {
 }
 
 func parseMMDB(data []byte, ipinfo bool) (parseResult, error) {
-	db, err := maxminddb.FromBytes(data)
+	db, err := maxminddb.OpenBytes(data)
 	if err != nil {
 		return parseResult{}, err
 	}
 	defer db.Close()
 	builder := new(netipx.IPSetBuilder)
 	result := parseResult{}
-	networks := db.Networks(maxminddb.SkipAliasedNetworks)
-	for networks.Next() {
+	for network := range db.Networks() {
 		result.raw++
-		var subnet *net.IPNet
 		var country string
 		if ipinfo {
 			var record ipInfoLite
-			subnet, err = networks.Network(&record)
+			err = network.Decode(&record)
 			country = record.CountryCode
 		} else {
 			var record geoip2.Country
-			subnet, err = networks.Network(&record)
-			country = record.Country.IsoCode
+			err = network.Decode(&record)
+			country = record.Country.ISOCode
 			if country == "" {
-				country = record.RegisteredCountry.IsoCode
+				country = record.RegisteredCountry.ISOCode
 			}
 			if country == "" {
-				country = record.RepresentedCountry.IsoCode
+				country = record.RepresentedCountry.ISOCode
 			}
 		}
 		if err != nil {
@@ -373,16 +370,16 @@ func parseMMDB(data []byte, ipinfo bool) (parseResult, error) {
 		if !strings.EqualFold(strings.TrimSpace(country), "CN") {
 			continue
 		}
-		prefix, ok := netipx.FromStdIPNet(subnet)
-		if !ok || !isPublicPrefix(prefix) {
+		if !network.Found() {
+			continue
+		}
+		prefix := network.Prefix().Masked()
+		if !isPublicPrefix(prefix) {
 			result.rejected++
 			continue
 		}
 		builder.AddPrefix(prefix)
 		result.accepted++
-	}
-	if err := networks.Err(); err != nil {
-		return result, err
 	}
 	set, err := builder.IPSet()
 	result.set = set

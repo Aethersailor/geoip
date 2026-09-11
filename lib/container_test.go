@@ -1,9 +1,34 @@
 package lib
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 )
+
+func TestContainerLoopAllowsRemoval(t *testing.T) {
+	for _, count := range []int{0, 1, 1000} {
+		t.Run(fmt.Sprint(count), func(t *testing.T) {
+			container := NewContainer()
+			for i := 0; i < count; i++ {
+				if err := container.Add(NewEntry(fmt.Sprint(i))); err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			visited := 0
+			for entry := range container.Loop() {
+				if err := container.Remove(entry, CaseRemoveEntry); err != nil {
+					t.Fatal(err)
+				}
+				visited++
+			}
+			if visited != count || container.Len() != 0 {
+				t.Fatalf("visited %d of %d entries; %d remain", visited, count, container.Len())
+			}
+		})
+	}
+}
 
 func TestContainerInvalidatesCachedSetsAfterAddAndRemove(t *testing.T) {
 	t.Parallel()
