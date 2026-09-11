@@ -80,7 +80,7 @@ This project releases various GeoIP formats twice daily at 00:30 and 12:30 UTC a
 
 ### 自动构建与发布
 
-正式工作流每天运行两次。构建会先完成单元测试、来源审计、MMDB 完整性检查及不同输出格式的 CN 集合一致性验证。只有内容清单发生变化时，才会更新 `release` 分支、滚动 `latest` Release、当月快照和常用 jsDelivr 路径。
+正式工作流每天运行两次。构建会先完成单元测试、来源审计、MMDB 完整性检查及不同输出格式的 CN 集合一致性验证。只有内容清单发生变化时，才会更新 `release` 分支、创建新的时间戳 Release、更新滚动 `latest` Release，并刷新常用 jsDelivr 路径。
 
 ## 下载地址与使用方法
 

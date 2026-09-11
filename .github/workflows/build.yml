@@ -139,7 +139,7 @@ jobs:
           git push --force origin release
           echo "release_sha=$release_sha" >> "$GITHUB_OUTPUT"
 
-      - name: Update rolling and monthly releases
+      - name: Publish timestamped and rolling releases
         if: github.ref == 'refs/heads/master' && steps.changes.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -151,19 +151,22 @@ jobs:
             assets+=("$file")
           done
 
+          notes="Automated verified build from ${GITHUB_SHA}. Source audit and content manifest are attached."
+          release_tag="$(date -u +%Y%m%d%H%M)"
+          gh release create "$release_tag" \
+            --target "$GITHUB_SHA" \
+            --title "$release_tag" \
+            --notes "$notes" \
+            --latest=false \
+            "${assets[@]}"
+
           git tag -f latest "$GITHUB_SHA"
           git push --force origin refs/tags/latest
-          notes="Automated verified build from ${GITHUB_SHA}. Source audit and content manifest are attached."
           if gh release view latest >/dev/null 2>&1; then
             gh release upload latest "${assets[@]}" --clobber
             gh release edit latest --title "Latest GeoIP build" --notes "$notes" --latest
           else
             gh release create latest --verify-tag --title "Latest GeoIP build" --notes "$notes" --latest "${assets[@]}"
-          fi
-
-          snapshot="snapshot-$(date -u +%Y%m)"
-          if ! gh release view "$snapshot" >/dev/null 2>&1; then
-            gh release create "$snapshot" --target "$GITHUB_SHA" --title "GeoIP snapshot $(date -u +%Y-%m)" --notes "$notes" --latest=false "${assets[@]}"
           fi
           gh release edit latest --latest
 
