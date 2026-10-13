@@ -80,7 +80,7 @@ This project releases various GeoIP formats twice daily at 00:30 and 12:30 UTC a
 
 ### 自动构建与发布
 
-正式工作流每天运行两次。构建会先完成单元测试、来源审计、MMDB 完整性检查及不同输出格式的 CN 集合一致性验证。只有内容清单发生变化时，才会更新 `release` 分支、创建并标记新的时间戳 Release 为 Latest、更新兼容下载入口 `latest` 的附件，并刷新常用 jsDelivr 路径。
+正式工作流每天运行两次，收集来源数据、生成 GeoIP 文件，并检查 MMDB 完整性及不同输出格式的 CN 集合一致性。只有内容清单发生变化时，才会更新 `release` 分支、创建并标记新的时间戳 Release 为 Latest、更新兼容下载入口 `latest` 的附件，并刷新常用 jsDelivr 路径。CodeQL 独立扫描，不作为构建发布的前置条件。
 
 ## 下载地址与使用方法
 
@@ -1079,7 +1079,6 @@ All available input formats:
   - singboxSRS (Convert sing-box SRS data to other formats)
   - stdin (Accept plaintext IP & CIDR from standard input, separated by newline)
   - surgeRuleSet (Convert Surge RuleSet to other formats (just processing IP & CIDR lines))
-  - test (Convert specific CIDR to other formats (for test only))
   - text (Convert plaintext IP & CIDR to other formats)
   - v2rayGeoIPDat (Convert V2Ray GeoIP dat to other formats)
 
