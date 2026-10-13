@@ -52,7 +52,7 @@ jobs:
     - name: Build Go sources for analysis
       if: matrix.language == 'go'
       run: |
-        go build ./...
+        go build -a ./...
     - name: Analyze source
       uses: github/codeql-action/analyze@f3c49fd1ef3281abc41069b3dd22807a60c963f6
       with:
