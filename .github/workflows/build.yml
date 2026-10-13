@@ -1,203 +1,185 @@
 name: Build geoip files
-
-on:
-  workflow_dispatch:
+'on':
+  workflow_dispatch: null
   schedule:
-    - cron: "30 0,12 * * *"
+  - cron: 30 0,12 * * *
   push:
     branches:
-      - master
+    - master
     paths-ignore:
-      - "assets/*"
-      - ".gitignore"
-      - "LICENSE*"
-      - "*.md"
+    - assets/*
+    - .gitignore
+    - LICENSE*
+    - '*.md'
   pull_request:
     branches:
-      - master
+    - master
     paths-ignore:
-      - "assets/*"
-      - ".gitignore"
-      - "LICENSE*"
-      - "*.md"
-
+    - assets/*
+    - .gitignore
+    - LICENSE*
+    - '*.md'
 permissions:
   contents: write
-
 concurrency:
   group: geoip-release
   cancel-in-progress: false
-
 jobs:
   build:
     name: Build, verify and publish
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Checkout codebase
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 1
+    - name: Checkout codebase
+      uses: actions/checkout@v7
+      with:
+        fetch-depth: 1
+    - name: Set up Go
+      uses: actions/setup-go@v7
+      with:
+        go-version-file: ./go.mod
+        cache: true
+    - name: Build tools
+      run: |
+        go build -o geoip .
+        echo "SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)" >> "$GITHUB_ENV"
+    - name: Prepare audited CN sources
+      env:
+        IPINFO_TOKEN: ${{ secrets.IPINFO_TOKEN }}
+      run: |
+        go run ./cmd/sourceprep \
+          -manifest ./sources/cn.json \
+          -output ./.cache/geoip-sources/cn.txt \
+          -report ./.cache/source-report.json
+    - name: Download GeoLite2 databases
+      run: |
+        mkdir -p output
+        curl_opts=(--fail --location --retry 3 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 180)
+        curl "${curl_opts[@]}" "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/GeoLite2-ASN.tar.gz" -o ./output/GeoLite2-ASN.tar.gz
+        curl "${curl_opts[@]}" "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/GeoLite2-ASN-CSV.zip" -o ./output/GeoLite2-ASN-CSV.zip
+        curl "${curl_opts[@]}" "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/GeoLite2-Country.tar.gz" -o ./output/GeoLite2-Country.tar.gz
+        curl "${curl_opts[@]}" "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/GeoLite2-Country-CSV.zip" -o ./output/GeoLite2-Country-CSV.zip
+    - name: Prepare GeoLite2 databases
+      run: |
+        cp ./output/*.gz ./output/*.zip ./
+        unzip -q GeoLite2-Country-CSV.zip
+        unzip -q GeoLite2-ASN-CSV.zip
+        tar -xzf GeoLite2-Country.tar.gz
+        tar -xzf GeoLite2-ASN.tar.gz
 
-      - name: Set up Go
-        uses: actions/setup-go@v7
-        with:
-          go-version-file: ./go.mod
-          cache: true
+        cp GeoLite2-Country_*/*.mmdb ./output/
+        cp GeoLite2-ASN_*/*.mmdb ./output/
+        cp GeoLite2-Country-CSV_*/GeoLite2-Country-Blocks-*.csv ./output/
+        cp GeoLite2-Country-CSV_*/GeoLite2-Country-Locations-en.csv ./output/
+        cp GeoLite2-Country-CSV_*/GeoLite2-Country-Locations-zh-CN.csv ./output/
+        cp GeoLite2-ASN-CSV_*/*.csv ./output/
 
-      - name: Test and build tools
-        run: |
-          go test ./...
-          go build -o geoip .
-          echo "SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)" >> "$GITHUB_ENV"
-
-      - name: Prepare audited CN sources
-        env:
-          IPINFO_TOKEN: ${{ secrets.IPINFO_TOKEN }}
-        run: |
-          go run ./cmd/sourceprep \
-            -manifest ./sources/cn.json \
-            -output ./.cache/geoip-sources/cn.txt \
-            -report ./.cache/source-report.json
-
-      - name: Download GeoLite2 databases
-        run: |
-          mkdir -p output
-          curl_opts=(--fail --location --retry 3 --retry-all-errors --retry-delay 2 --connect-timeout 15 --max-time 180)
-          curl "${curl_opts[@]}" "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/GeoLite2-ASN.tar.gz" -o ./output/GeoLite2-ASN.tar.gz
-          curl "${curl_opts[@]}" "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/GeoLite2-ASN-CSV.zip" -o ./output/GeoLite2-ASN-CSV.zip
-          curl "${curl_opts[@]}" "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/GeoLite2-Country.tar.gz" -o ./output/GeoLite2-Country.tar.gz
-          curl "${curl_opts[@]}" "https://raw.githubusercontent.com/Loyalsoldier/geoip/refs/heads/release/GeoLite2-Country-CSV.zip" -o ./output/GeoLite2-Country-CSV.zip
-
-      - name: Prepare GeoLite2 databases
-        run: |
-          cp ./output/*.gz ./output/*.zip ./
-          unzip -q GeoLite2-Country-CSV.zip
-          unzip -q GeoLite2-ASN-CSV.zip
-          tar -xzf GeoLite2-Country.tar.gz
-          tar -xzf GeoLite2-ASN.tar.gz
-
-          cp GeoLite2-Country_*/*.mmdb ./output/
-          cp GeoLite2-ASN_*/*.mmdb ./output/
-          cp GeoLite2-Country-CSV_*/GeoLite2-Country-Blocks-*.csv ./output/
-          cp GeoLite2-Country-CSV_*/GeoLite2-Country-Locations-en.csv ./output/
-          cp GeoLite2-Country-CSV_*/GeoLite2-Country-Locations-zh-CN.csv ./output/
-          cp GeoLite2-ASN-CSV_*/*.csv ./output/
-
-          mkdir -p geolite2
-          cp GeoLite2-Country-CSV_*/*.csv ./geolite2/
-          cp GeoLite2-ASN-CSV_*/*.csv ./geolite2/
-
-      - name: Build geoip files once
-        env:
-          GEOIP_HTTP_TIMEOUT: 60s
-          GEOIP_HTTP_MAX_RETRIES: 3
-          GEOIP_HTTP_BACKOFF_BASE: 2s
-          GEOIP_HTTP_BACKOFF_LIMIT: 8s
-        run: ./geoip convert -c ./config.json
-
-      - name: Verify every output format
-        run: |
-          go install github.com/maxmind/mmdbverify@v1.0.0
-          for file in ./output/*.mmdb; do
-            "$(go env GOPATH)/bin/mmdbverify" -file "$file"
-          done
-          go run ./cmd/outputverify \
-            -output ./output \
-            -source-report ./.cache/source-report.json
-
-      - name: Detect meaningful changes
-        id: changes
-        run: |
-          changed=true
-          if git fetch origin refs/heads/release:refs/remotes/origin/release --depth=1 && git show origin/release:content-manifest.sha256 > /tmp/previous-manifest.sha256 2>/dev/null; then
-            if cmp -s /tmp/previous-manifest.sha256 ./output/content-manifest.sha256; then
-              changed=false
-            fi
+        mkdir -p geolite2
+        cp GeoLite2-Country-CSV_*/*.csv ./geolite2/
+        cp GeoLite2-ASN-CSV_*/*.csv ./geolite2/
+    - name: Build geoip files once
+      env:
+        GEOIP_HTTP_TIMEOUT: 60s
+        GEOIP_HTTP_MAX_RETRIES: 3
+        GEOIP_HTTP_BACKOFF_BASE: 2s
+        GEOIP_HTTP_BACKOFF_LIMIT: 8s
+      run: ./geoip convert -c ./config.json
+    - name: Verify every output format
+      run: |
+        go install github.com/maxmind/mmdbverify@v1.0.0
+        for file in ./output/*.mmdb; do
+          "$(go env GOPATH)/bin/mmdbverify" -file "$file"
+        done
+        go run ./cmd/outputverify \
+          -output ./output \
+          -source-report ./.cache/source-report.json
+    - name: Detect meaningful changes
+      id: changes
+      run: |
+        changed=true
+        if git fetch origin refs/heads/release:refs/remotes/origin/release --depth=1 && git show origin/release:content-manifest.sha256 > /tmp/previous-manifest.sha256 2>/dev/null; then
+          if cmp -s /tmp/previous-manifest.sha256 ./output/content-manifest.sha256; then
+            changed=false
           fi
-          echo "changed=$changed" >> "$GITHUB_OUTPUT"
-          if [[ "${GITHUB_REF}" != "refs/heads/master" ]]; then
-            echo "Feature-branch rehearsal only; publishing is disabled. would_publish=$changed"
-          else
-            echo "master content changed=$changed"
-          fi
+        fi
+        echo "changed=$changed" >> "$GITHUB_OUTPUT"
+        if [[ "${GITHUB_REF}" != "refs/heads/master" ]]; then
+          echo "Feature-branch rehearsal only; publishing is disabled. would_publish=$changed"
+        else
+          echo "master content changed=$changed"
+        fi
+    - name: Publish release branch
+      id: publish
+      if: github.ref == 'refs/heads/master' && steps.changes.outputs.changed == 'true'
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        cd output
+        git init -b release
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add -A
+        git commit -m "build(release): update GeoIP artifacts"
+        release_sha=$(git rev-parse HEAD)
+        git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+        git push --force origin release
+        echo "release_sha=$release_sha" >> "$GITHUB_OUTPUT"
+    - name: Publish timestamped and rolling releases
+      if: github.ref == 'refs/heads/master' && steps.changes.outputs.changed == 'true'
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        assets=()
+        for file in ./output/*.dat ./output/*.mmdb ./output/*.sha256sum ./output/build-info.json ./output/source-report.json ./output/content-manifest.sha256; do
+          [[ -f "$file" ]] || continue
+          [[ "$(basename "$file")" == GeoLite2-* ]] && continue
+          assets+=("$file")
+        done
 
-      - name: Publish release branch
-        id: publish
-        if: github.ref == 'refs/heads/master' && steps.changes.outputs.changed == 'true'
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          cd output
-          git init -b release
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "build(release): update GeoIP artifacts"
-          release_sha=$(git rev-parse HEAD)
-          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          git push --force origin release
-          echo "release_sha=$release_sha" >> "$GITHUB_OUTPUT"
+        notes="Automated verified build from ${GITHUB_SHA}. Source audit and content manifest are attached."
+        release_tag="$(date -u +%Y%m%d%H%M)"
+        gh release create "$release_tag" \
+          --target "$GITHUB_SHA" \
+          --title "$release_tag" \
+          --notes "$notes" \
+          --latest \
+          "${assets[@]}"
 
-      - name: Publish timestamped and rolling releases
-        if: github.ref == 'refs/heads/master' && steps.changes.outputs.changed == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          assets=()
-          for file in ./output/*.dat ./output/*.mmdb ./output/*.sha256sum ./output/build-info.json ./output/source-report.json ./output/content-manifest.sha256; do
-            [[ -f "$file" ]] || continue
-            [[ "$(basename "$file")" == GeoLite2-* ]] && continue
-            assets+=("$file")
-          done
-
-          notes="Automated verified build from ${GITHUB_SHA}. Source audit and content manifest are attached."
-          release_tag="$(date -u +%Y%m%d%H%M)"
-          gh release create "$release_tag" \
-            --target "$GITHUB_SHA" \
-            --title "$release_tag" \
-            --notes "$notes" \
-            --latest \
-            "${assets[@]}"
-
-          git tag -f latest "$GITHUB_SHA"
-          git push --force origin refs/tags/latest
-          if gh release view latest >/dev/null 2>&1; then
-            gh release upload latest "${assets[@]}" --clobber
-            gh release edit latest --title "Latest GeoIP build" --notes "$notes"
-          else
-            gh release create latest --verify-tag --title "Latest GeoIP build" --notes "$notes" --latest=false "${assets[@]}"
-          fi
-
-      - name: Purge changed jsDelivr paths
-        if: github.ref == 'refs/heads/master' && steps.changes.outputs.changed == 'true'
-        run: |
-          paths=(
-            geoip.dat geoip-only-cn-private.dat cn.dat
-            Country.mmdb Country-without-asn.mmdb Country-only-cn-private.mmdb
-            text/cn.txt text/cn-ipv4.txt text/cn-ipv6.txt
-            clash/classical/cn.txt clash/ipcidr/cn.txt surge/cn.txt
-            dat/cn.dat mrs/cn.mrs srs/cn.srs
-            source-report.json build-info.json content-manifest.sha256
-          )
-          for path in "${paths[@]}"; do
-            curl --silent --show-error --fail --retry 2 \
-              "https://purge.jsdelivr.net/gh/${GITHUB_REPOSITORY}@release/${path}" >/dev/null \
-              || echo "::warning::jsDelivr purge failed for ${path}"
-          done
-
-      - name: Verify published release branch
-        if: github.ref == 'refs/heads/master' && steps.changes.outputs.changed == 'true'
-        env:
-          EXPECTED_RELEASE_SHA: ${{ steps.publish.outputs.release_sha }}
-        run: |
-          remote_sha=$(git ls-remote origin refs/heads/release | awk '{print $1}')
-          test "$remote_sha" = "$EXPECTED_RELEASE_SHA"
-          curl --fail --location --retry 6 --retry-delay 5 \
-            "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/release/content-manifest.sha256?run=${GITHUB_RUN_ID}" \
-            -o /tmp/published-manifest.sha256
-          cmp ./output/content-manifest.sha256 /tmp/published-manifest.sha256
-
-      - name: Report no-op publication
-        if: github.ref == 'refs/heads/master' && steps.changes.outputs.changed == 'false'
-        run: echo "Inputs and generated content are unchanged; release publication was skipped."
+        git tag -f latest "$GITHUB_SHA"
+        git push --force origin refs/tags/latest
+        if gh release view latest >/dev/null 2>&1; then
+          gh release upload latest "${assets[@]}" --clobber
+          gh release edit latest --title "Latest GeoIP build" --notes "$notes"
+        else
+          gh release create latest --verify-tag --title "Latest GeoIP build" --notes "$notes" --latest=false "${assets[@]}"
+        fi
+    - name: Purge changed jsDelivr paths
+      if: github.ref == 'refs/heads/master' && steps.changes.outputs.changed == 'true'
+      run: |
+        paths=(
+          geoip.dat geoip-only-cn-private.dat cn.dat
+          Country.mmdb Country-without-asn.mmdb Country-only-cn-private.mmdb
+          text/cn.txt text/cn-ipv4.txt text/cn-ipv6.txt
+          clash/classical/cn.txt clash/ipcidr/cn.txt surge/cn.txt
+          dat/cn.dat mrs/cn.mrs srs/cn.srs
+          source-report.json build-info.json content-manifest.sha256
+        )
+        for path in "${paths[@]}"; do
+          curl --silent --show-error --fail --retry 2 \
+            "https://purge.jsdelivr.net/gh/${GITHUB_REPOSITORY}@release/${path}" >/dev/null \
+            || echo "::warning::jsDelivr purge failed for ${path}"
+        done
+    - name: Verify published release branch
+      if: github.ref == 'refs/heads/master' && steps.changes.outputs.changed == 'true'
+      env:
+        EXPECTED_RELEASE_SHA: ${{ steps.publish.outputs.release_sha }}
+      run: |
+        remote_sha=$(git ls-remote origin refs/heads/release | awk '{print $1}')
+        test "$remote_sha" = "$EXPECTED_RELEASE_SHA"
+        curl --fail --location --retry 6 --retry-delay 5 \
+          "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/release/content-manifest.sha256?run=${GITHUB_RUN_ID}" \
+          -o /tmp/published-manifest.sha256
+        cmp ./output/content-manifest.sha256 /tmp/published-manifest.sha256
+    - name: Report no-op publication
+      if: github.ref == 'refs/heads/master' && steps.changes.outputs.changed == 'false'
+      run: echo "Inputs and generated content are unchanged; release publication was skipped."
