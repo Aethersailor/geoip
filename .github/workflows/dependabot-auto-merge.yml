@@ -7,7 +7,7 @@ on:
     branches: ["master"]
     paths: ['.github/workflows/dependabot-auto-merge.yml']
   schedule:
-    - cron: '12,27,42,57 * * * *'
+    - cron: '12 */6 * * *'
   workflow_dispatch:
 
 permissions:
