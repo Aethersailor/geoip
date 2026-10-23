@@ -27,57 +27,14 @@ const (
 
 func init() {
 	lib.RegisterInputConfigCreator(TypeMRSIn, func(action lib.Action, data json.RawMessage) (lib.InputConverter, error) {
-		return newMRSIn(action, data)
+		return NewMRSInFromBytes(action, data)
 	})
-	lib.RegisterInputConverter(TypeMRSIn, &MRSIn{
+	lib.RegisterInputConverter(TypeMRSIn, &mrs_in{
 		Description: DescMRSIn,
 	})
 }
 
-func newMRSIn(action lib.Action, data json.RawMessage) (lib.InputConverter, error) {
-	var tmp struct {
-		Name       string     `json:"name"`
-		URI        string     `json:"uri"`
-		InputDir   string     `json:"inputDir"`
-		Want       []string   `json:"wantedList"`
-		OnlyIPType lib.IPType `json:"onlyIPType"`
-	}
-
-	if len(data) > 0 {
-		if err := json.Unmarshal(data, &tmp); err != nil {
-			return nil, err
-		}
-	}
-
-	if tmp.Name == "" && tmp.URI == "" && tmp.InputDir == "" {
-		return nil, fmt.Errorf("❌ [type %s | action %s] missing inputDir or name or uri", TypeMRSIn, action)
-	}
-
-	if (tmp.Name != "" && tmp.URI == "") || (tmp.Name == "" && tmp.URI != "") {
-		return nil, fmt.Errorf("❌ [type %s | action %s] name & uri must be specified together", TypeMRSIn, action)
-	}
-
-	// Filter want list
-	wantList := make(map[string]bool)
-	for _, want := range tmp.Want {
-		if want = strings.ToUpper(strings.TrimSpace(want)); want != "" {
-			wantList[want] = true
-		}
-	}
-
-	return &MRSIn{
-		Type:        TypeMRSIn,
-		Action:      action,
-		Description: DescMRSIn,
-		Name:        tmp.Name,
-		URI:         tmp.URI,
-		InputDir:    tmp.InputDir,
-		Want:        wantList,
-		OnlyIPType:  tmp.OnlyIPType,
-	}, nil
-}
-
-type MRSIn struct {
+type mrs_in struct {
 	Type        string
 	Action      lib.Action
 	Description string
@@ -88,19 +45,99 @@ type MRSIn struct {
 	OnlyIPType  lib.IPType
 }
 
-func (m *MRSIn) GetType() string {
+func NewMRSIn(action lib.Action, opts ...lib.InputOption) (lib.InputConverter, error) {
+	m := &mrs_in{
+		Type:        TypeMRSIn,
+		Action:      action,
+		Description: DescMRSIn,
+	}
+
+	for _, opt := range opts {
+		if opt != nil {
+			opt(m)
+		}
+	}
+
+	if m.Name == "" && m.URI == "" && m.InputDir == "" {
+		return nil, fmt.Errorf("❌ [type %s | action %s] missing name or uri or inputDir", m.Type, m.Action)
+	}
+
+	if (m.Name != "" && m.URI == "") || (m.Name == "" && m.URI != "") {
+		return nil, fmt.Errorf("❌ [type %s | action %s] name and uri must be specified together", m.Type, m.Action)
+	}
+
+	return m, nil
+}
+
+func WithNameAndURI(name, uri string) lib.InputOption {
+	return func(m lib.InputConverter) {
+		m.(*mrs_in).Name = strings.TrimSpace(name)
+		m.(*mrs_in).URI = strings.TrimSpace(uri)
+	}
+}
+
+func WithInputDir(dir string) lib.InputOption {
+	return func(m lib.InputConverter) {
+		m.(*mrs_in).InputDir = strings.TrimSpace(dir)
+	}
+}
+
+func WithInputWantedList(lists []string) lib.InputOption {
+	return func(m lib.InputConverter) {
+		wantList := make(map[string]bool)
+		for _, want := range lists {
+			if want = strings.ToUpper(strings.TrimSpace(want)); want != "" {
+				wantList[want] = true
+			}
+		}
+
+		m.(*mrs_in).Want = wantList
+	}
+}
+
+func WithInputOnlyIPType(onlyIPType lib.IPType) lib.InputOption {
+	return func(m lib.InputConverter) {
+		m.(*mrs_in).OnlyIPType = onlyIPType
+	}
+}
+
+func NewMRSInFromBytes(action lib.Action, data []byte) (lib.InputConverter, error) {
+	var tmp struct {
+		Name       string     `json:"name"`
+		URI        string     `json:"uri"`
+		InputDir   string     `json:"inputDir"`
+		Want       []string   `json:"wantedList"`
+		OnlyIPType lib.IPType `json:"onlyIPType"`
+	}
+
+	if len(data) > 0 {
+		if err := json.Unmarshal(data, &tmp); err != nil {
+			return nil, fmt.Errorf("❌ [type %s | action %s] %w", TypeMRSIn, action, err)
+		}
+	}
+
+	return NewMRSIn(
+		action,
+		WithNameAndURI(tmp.Name, tmp.URI),
+		WithInputDir(tmp.InputDir),
+		WithInputWantedList(tmp.Want),
+		WithInputOnlyIPType(tmp.OnlyIPType),
+	)
+}
+
+func (m *mrs_in) GetType() string {
 	return m.Type
 }
 
-func (m *MRSIn) GetAction() lib.Action {
+func (m *mrs_in) GetAction() lib.Action {
 	return m.Action
 }
 
-func (m *MRSIn) GetDescription() string {
+func (m *mrs_in) GetDescription() string {
 	return m.Description
 }
 
-func (m *MRSIn) Input(container lib.Container) (lib.Container, error) {
+func (m *mrs_in) Input(container lib.Container) (lib.Container, error) {
 	entries := make(map[string]*lib.Entry)
 	var err error
 
@@ -119,7 +156,7 @@ func (m *MRSIn) Input(container lib.Container) (lib.Container, error) {
 	}
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("❌ [type %s | action %s] %w", m.Type, m.Action, err)
 	}
 
 	if len(entries) == 0 {
@@ -132,21 +169,21 @@ func (m *MRSIn) Input(container lib.Container) (lib.Container, error) {
 		switch m.Action {
 		case lib.ActionAdd:
 			if err := container.Add(entry, ignoreIPType); err != nil {
-				return nil, err
+				return nil, fmt.Errorf("❌ [type %s | action %s] %w", m.Type, m.Action, err)
 			}
 		case lib.ActionRemove:
 			if err := container.Remove(entry, lib.CaseRemovePrefix, ignoreIPType); err != nil {
-				return nil, err
+				return nil, fmt.Errorf("❌ [type %s | action %s] %w", m.Type, m.Action, err)
 			}
 		default:
-			return nil, lib.ErrUnknownAction
+			return nil, fmt.Errorf("❌ [type %s | action %s] %w", m.Type, m.Action, lib.ErrUnknownAction)
 		}
 	}
 
 	return container, nil
 }
 
-func (m *MRSIn) walkDir(dir string, entries map[string]*lib.Entry) error {
+func (m *mrs_in) walkDir(dir string, entries map[string]*lib.Entry) error {
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -165,7 +202,7 @@ func (m *MRSIn) walkDir(dir string, entries map[string]*lib.Entry) error {
 	return err
 }
 
-func (m *MRSIn) walkLocalFile(path, name string, entries map[string]*lib.Entry) error {
+func (m *mrs_in) walkLocalFile(path, name string, entries map[string]*lib.Entry) error {
 	entryName := ""
 	name = strings.TrimSpace(name)
 	if name != "" {
@@ -175,7 +212,7 @@ func (m *MRSIn) walkLocalFile(path, name string, entries map[string]*lib.Entry) 
 
 		// check filename
 		if !regexp.MustCompile(`^[a-zA-Z0-9_.\-]+$`).MatchString(entryName) {
-			return fmt.Errorf("❌ [type %s | action %s] filename %s cannot be entry name, please remove special characters in it", m.Type, m.Action, entryName)
+			return fmt.Errorf("filename %s cannot be entry name, please remove special characters in it", entryName)
 		}
 
 		// remove file extension but not hidden files of which filename starts with "."
@@ -187,7 +224,7 @@ func (m *MRSIn) walkLocalFile(path, name string, entries map[string]*lib.Entry) 
 
 	entryName = strings.ToUpper(entryName)
 	if _, found := entries[entryName]; found {
-		return fmt.Errorf("❌ [type %s | action %s] found duplicated list %s", m.Type, m.Action, entryName)
+		return fmt.Errorf("found duplicated list %s", entryName)
 	}
 
 	file, err := os.Open(path)
@@ -203,7 +240,7 @@ func (m *MRSIn) walkLocalFile(path, name string, entries map[string]*lib.Entry) 
 	return nil
 }
 
-func (m *MRSIn) walkRemoteFile(url, name string, entries map[string]*lib.Entry) error {
+func (m *mrs_in) walkRemoteFile(url, name string, entries map[string]*lib.Entry) error {
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
@@ -211,7 +248,7 @@ func (m *MRSIn) walkRemoteFile(url, name string, entries map[string]*lib.Entry) 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("❌ [type %s | action %s] failed to get remote file %s, http status code %d", m.Type, m.Action, url, resp.StatusCode)
+		return fmt.Errorf("failed to get remote file %s, http status code %d", url, resp.StatusCode)
 	}
 
 	if err := m.generateEntries(name, resp.Body, entries); err != nil {
@@ -221,7 +258,7 @@ func (m *MRSIn) walkRemoteFile(url, name string, entries map[string]*lib.Entry) 
 	return nil
 }
 
-func (m *MRSIn) generateEntries(name string, reader io.Reader, entries map[string]*lib.Entry) error {
+func (m *mrs_in) generateEntries(name string, reader io.Reader, entries map[string]*lib.Entry) error {
 	name = strings.ToUpper(name)
 
 	if len(m.Want) > 0 && !m.Want[name] {
@@ -247,7 +284,7 @@ func (m *MRSIn) generateEntries(name string, reader io.Reader, entries map[strin
 	return nil
 }
 
-func (m *MRSIn) parseMRS(data []byte, entry *lib.Entry) error {
+func (m *mrs_in) parseMRS(data []byte, entry *lib.Entry) error {
 	reader, err := zstd.NewReader(bytes.NewReader(data))
 	if err != nil {
 		return err
@@ -291,8 +328,7 @@ func (m *MRSIn) parseMRS(data []byte, entry *lib.Entry) error {
 		return fmt.Errorf("invalid MRS extra length")
 	}
 	if length > 0 {
-		extra := make([]byte, length)
-		_, err = io.ReadFull(reader, extra)
+		_, err = io.CopyN(io.Discard, reader, length)
 		if err != nil {
 			return err
 		}

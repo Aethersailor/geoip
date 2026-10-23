@@ -25,60 +25,14 @@ var (
 
 func init() {
 	lib.RegisterInputConfigCreator(TypeGeoLite2CountryCSVIn, func(action lib.Action, data json.RawMessage) (lib.InputConverter, error) {
-		return newGeoLite2CountryCSVIn(action, data)
+		return NewGeoLite2CountryCSVInFromBytes(action, data)
 	})
-	lib.RegisterInputConverter(TypeGeoLite2CountryCSVIn, &GeoLite2CountryCSVIn{
+	lib.RegisterInputConverter(TypeGeoLite2CountryCSVIn, &geolite2_country_csv_in{
 		Description: DescGeoLite2CountryCSVIn,
 	})
 }
 
-func newGeoLite2CountryCSVIn(action lib.Action, data json.RawMessage) (lib.InputConverter, error) {
-	var tmp struct {
-		CountryCodeFile string     `json:"country"`
-		IPv4File        string     `json:"ipv4"`
-		IPv6File        string     `json:"ipv6"`
-		Want            []string   `json:"wantedList"`
-		OnlyIPType      lib.IPType `json:"onlyIPType"`
-	}
-
-	if len(data) > 0 {
-		if err := json.Unmarshal(data, &tmp); err != nil {
-			return nil, err
-		}
-	}
-
-	if tmp.CountryCodeFile == "" {
-		tmp.CountryCodeFile = defaultGeoLite2CountryCodeFile
-	}
-
-	// When both of IP files are not specified,
-	// it means user wants to use the default ones
-	if tmp.IPv4File == "" && tmp.IPv6File == "" {
-		tmp.IPv4File = defaultGeoLite2CountryIPv4File
-		tmp.IPv6File = defaultGeoLite2CountryIPv6File
-	}
-
-	// Filter want list
-	wantList := make(map[string]bool)
-	for _, want := range tmp.Want {
-		if want = strings.ToUpper(strings.TrimSpace(want)); want != "" {
-			wantList[want] = true
-		}
-	}
-
-	return &GeoLite2CountryCSVIn{
-		Type:            TypeGeoLite2CountryCSVIn,
-		Action:          action,
-		Description:     DescGeoLite2CountryCSVIn,
-		CountryCodeFile: tmp.CountryCodeFile,
-		IPv4File:        tmp.IPv4File,
-		IPv6File:        tmp.IPv6File,
-		Want:            wantList,
-		OnlyIPType:      tmp.OnlyIPType,
-	}, nil
-}
-
-type GeoLite2CountryCSVIn struct {
+type geolite2_country_csv_in struct {
 	Type            string
 	Action          lib.Action
 	Description     string
@@ -89,35 +43,93 @@ type GeoLite2CountryCSVIn struct {
 	OnlyIPType      lib.IPType
 }
 
-func (g *GeoLite2CountryCSVIn) GetType() string {
+func NewGeoLite2CountryCSVIn(action lib.Action, opts ...lib.InputOption) (lib.InputConverter, error) {
+	g := &geolite2_country_csv_in{
+		Type:        TypeGeoLite2CountryCSVIn,
+		Action:      action,
+		Description: DescGeoLite2CountryCSVIn,
+	}
+
+	for _, opt := range opts {
+		if opt != nil {
+			opt(g)
+		}
+	}
+
+	if g.CountryCodeFile == "" {
+		g.CountryCodeFile = defaultGeoLite2CountryCodeFile
+	}
+
+	// When both of IP files are not specified,
+	// it means user wants to use the default ones
+	if g.IPv4File == "" && g.IPv6File == "" {
+		g.IPv4File = defaultGeoLite2CountryIPv4File
+		g.IPv6File = defaultGeoLite2CountryIPv6File
+	}
+
+	return g, nil
+}
+
+func WithCountryCodeFile(file string) lib.InputOption {
+	return func(g lib.InputConverter) {
+		g.(*geolite2_country_csv_in).CountryCodeFile = strings.TrimSpace(file)
+	}
+}
+
+func NewGeoLite2CountryCSVInFromBytes(action lib.Action, data []byte) (lib.InputConverter, error) {
+	var tmp struct {
+		CountryCodeFile string     `json:"country"`
+		IPv4File        string     `json:"ipv4"`
+		IPv6File        string     `json:"ipv6"`
+		Want            []string   `json:"wantedList"`
+		OnlyIPType      lib.IPType `json:"onlyIPType"`
+	}
+
+	if len(data) > 0 {
+		if err := json.Unmarshal(data, &tmp); err != nil {
+			return nil, fmt.Errorf("❌ [type %s | action %s] %w", TypeGeoLite2CountryCSVIn, action, err)
+		}
+	}
+
+	return NewGeoLite2CountryCSVIn(
+		action,
+		WithCountryCodeFile(tmp.CountryCodeFile),
+		WithIPv4File(tmp.IPv4File),
+		WithIPv6File(tmp.IPv6File),
+		WithInputWantedList(tmp.Want),
+		WithInputOnlyIPType(tmp.OnlyIPType),
+	)
+}
+
+func (g *geolite2_country_csv_in) GetType() string {
 	return g.Type
 }
 
-func (g *GeoLite2CountryCSVIn) GetAction() lib.Action {
+func (g *geolite2_country_csv_in) GetAction() lib.Action {
 	return g.Action
 }
 
-func (g *GeoLite2CountryCSVIn) GetDescription() string {
+func (g *geolite2_country_csv_in) GetDescription() string {
 	return g.Description
 }
 
-func (g *GeoLite2CountryCSVIn) Input(container lib.Container) (lib.Container, error) {
+func (g *geolite2_country_csv_in) Input(container lib.Container) (lib.Container, error) {
 	ccMap, err := g.getCountryCode()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("❌ [type %s | action %s] %w", g.Type, g.Action, err)
 	}
 
-	entries := make(map[string]*lib.Entry, len(ccMap))
+	entries := make(map[string]*lib.Entry)
 
 	if g.IPv4File != "" {
 		if err := g.process(g.IPv4File, ccMap, entries); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("❌ [type %s | action %s] %w", g.Type, g.Action, err)
 		}
 	}
 
 	if g.IPv6File != "" {
 		if err := g.process(g.IPv6File, ccMap, entries); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("❌ [type %s | action %s] %w", g.Type, g.Action, err)
 		}
 	}
 
@@ -131,21 +143,21 @@ func (g *GeoLite2CountryCSVIn) Input(container lib.Container) (lib.Container, er
 		switch g.Action {
 		case lib.ActionAdd:
 			if err := container.Add(entry, ignoreIPType); err != nil {
-				return nil, err
+				return nil, fmt.Errorf("❌ [type %s | action %s] %w", g.Type, g.Action, err)
 			}
 		case lib.ActionRemove:
 			if err := container.Remove(entry, lib.CaseRemovePrefix, ignoreIPType); err != nil {
-				return nil, err
+				return nil, fmt.Errorf("❌ [type %s | action %s] %w", g.Type, g.Action, err)
 			}
 		default:
-			return nil, lib.ErrUnknownAction
+			return nil, fmt.Errorf("❌ [type %s | action %s] %w", g.Type, g.Action, lib.ErrUnknownAction)
 		}
 	}
 
 	return container, nil
 }
 
-func (g *GeoLite2CountryCSVIn) getCountryCode() (map[string]string, error) {
+func (g *geolite2_country_csv_in) getCountryCode() (map[string]string, error) {
 	var f io.ReadCloser
 	var err error
 	switch {
@@ -166,13 +178,13 @@ func (g *GeoLite2CountryCSVIn) getCountryCode() (map[string]string, error) {
 		return nil, err
 	}
 	if len(lines) == 0 {
-		return nil, fmt.Errorf("❌ [type %s | action %s] empty country code file: %s", g.Type, g.Action, g.CountryCodeFile)
+		return nil, fmt.Errorf("empty country code file: %s", g.CountryCodeFile)
 	}
 
 	ccMap := make(map[string]string)
 	for _, line := range lines[1:] {
 		if len(line) < 5 {
-			return nil, fmt.Errorf("❌ [type %s | action %s] invalid record: %v", g.Type, g.Action, line)
+			return nil, fmt.Errorf("invalid record: %v", line)
 		}
 
 		id := strings.TrimSpace(line[0])
@@ -181,26 +193,22 @@ func (g *GeoLite2CountryCSVIn) getCountryCode() (map[string]string, error) {
 			continue
 		}
 
-		if len(g.Want) > 0 && !g.Want[countryCode] {
-			continue
-		}
-
 		ccMap[id] = countryCode
 	}
 
 	if len(ccMap) == 0 {
-		return nil, fmt.Errorf("❌ [type %s | action %s] invalid country code data", g.Type, g.Action)
+		return nil, fmt.Errorf("invalid country code data")
 	}
 
 	return ccMap, nil
 }
 
-func (g *GeoLite2CountryCSVIn) process(file string, ccMap map[string]string, entries map[string]*lib.Entry) error {
+func (g *geolite2_country_csv_in) process(file string, ccMap map[string]string, entries map[string]*lib.Entry) error {
 	if len(ccMap) == 0 {
-		return fmt.Errorf("❌ [type %s | action %s] invalid country code data", g.Type, g.Action)
+		return fmt.Errorf("invalid country code data")
 	}
 	if entries == nil {
-		entries = make(map[string]*lib.Entry, len(ccMap))
+		entries = make(map[string]*lib.Entry)
 	}
 
 	var f io.ReadCloser
@@ -230,34 +238,38 @@ func (g *GeoLite2CountryCSVIn) process(file string, ccMap map[string]string, ent
 		}
 
 		if len(record) < 4 {
-			return fmt.Errorf("❌ [type %s | action %s] invalid record: %v", g.Type, g.Action, record)
+			return fmt.Errorf("invalid record: %v", record)
 		}
 
-		ccID := ""
-		switch {
-		case strings.TrimSpace(record[1]) != "":
-			ccID = strings.TrimSpace(record[1])
-		case strings.TrimSpace(record[2]) != "":
-			ccID = strings.TrimSpace(record[2])
-		case strings.TrimSpace(record[3]) != "":
-			ccID = strings.TrimSpace(record[3])
-		default:
+		// Use the first ID that maps to a country code in the order of
+		// geoname_id, registered_country_geoname_id, represented_country_geoname_id,
+		// as geoname_id may refer to a continent rather than a country.
+		countryCode := ""
+		for _, ccID := range record[1:4] {
+			if cc, found := ccMap[strings.TrimSpace(ccID)]; found {
+				countryCode = cc
+				break
+			}
+		}
+		if countryCode == "" {
 			continue
 		}
 
-		if countryCode, found := ccMap[ccID]; found {
-			cidrStr := strings.ToLower(strings.TrimSpace(record[0]))
-			entry, got := entries[countryCode]
-			if !got {
-				entry = lib.NewEntry(countryCode)
-			}
-
-			if err := entry.AddPrefix(cidrStr); err != nil {
-				return err
-			}
-
-			entries[countryCode] = entry
+		if len(g.Want) > 0 && !g.Want[countryCode] {
+			continue
 		}
+
+		cidrStr := strings.ToLower(strings.TrimSpace(record[0]))
+		entry, got := entries[countryCode]
+		if !got {
+			entry = lib.NewEntry(countryCode)
+		}
+
+		if err := entry.AddPrefix(cidrStr); err != nil {
+			return err
+		}
+
+		entries[countryCode] = entry
 	}
 
 	return nil

@@ -24,14 +24,14 @@ const (
 
 func init() {
 	lib.RegisterOutputConfigCreator(TypeGeoLite2CountryMMDBOut, func(action lib.Action, data json.RawMessage) (lib.OutputConverter, error) {
-		return newGeoLite2CountryMMDBOut(TypeGeoLite2CountryMMDBOut, DescGeoLite2CountryMMDBOut, action, data)
+		return NewGeoLite2CountryMMDBOutFromBytes(action, data)
 	})
-	lib.RegisterOutputConverter(TypeGeoLite2CountryMMDBOut, &GeoLite2CountryMMDBOut{
+	lib.RegisterOutputConverter(TypeGeoLite2CountryMMDBOut, &geolite2_country_mmdb_out{
 		Description: DescGeoLite2CountryMMDBOut,
 	})
 }
 
-type GeoLite2CountryMMDBOut struct {
+type geolite2_country_mmdb_out struct {
 	Type        string
 	Action      lib.Action
 	Description string
@@ -45,19 +45,27 @@ type GeoLite2CountryMMDBOut struct {
 	SourceMMDBURI string
 }
 
-func (g *GeoLite2CountryMMDBOut) GetType() string {
+func NewGeoLite2CountryMMDBOut(action lib.Action, opts ...lib.OutputOption) (lib.OutputConverter, error) {
+	return newGeoLite2CountryMMDBOut(TypeGeoLite2CountryMMDBOut, DescGeoLite2CountryMMDBOut, action, opts...)
+}
+
+func NewGeoLite2CountryMMDBOutFromBytes(action lib.Action, data []byte) (lib.OutputConverter, error) {
+	return newGeoLite2CountryMMDBOutFromBytes(TypeGeoLite2CountryMMDBOut, DescGeoLite2CountryMMDBOut, action, data)
+}
+
+func (g *geolite2_country_mmdb_out) GetType() string {
 	return g.Type
 }
 
-func (g *GeoLite2CountryMMDBOut) GetAction() lib.Action {
+func (g *geolite2_country_mmdb_out) GetAction() lib.Action {
 	return g.Action
 }
 
-func (g *GeoLite2CountryMMDBOut) GetDescription() string {
+func (g *geolite2_country_mmdb_out) GetDescription() string {
 	return g.Description
 }
 
-func (g *GeoLite2CountryMMDBOut) Output(container lib.Container) error {
+func (g *geolite2_country_mmdb_out) Output(container lib.Container) error {
 	dbName := ""
 	dbDesc := ""
 	dbLanguages := []string{"en"}
@@ -96,13 +104,13 @@ func (g *GeoLite2CountryMMDBOut) Output(container lib.Container) error {
 		},
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("❌ [type %s | action %s] %w", g.Type, g.Action, err)
 	}
 
 	// Get extra info
 	extraInfo, err := g.GetExtraInfo()
 	if err != nil {
-		return err
+		return fmt.Errorf("❌ [type %s | action %s] %w", g.Type, g.Action, err)
 	}
 
 	updated := false
@@ -114,14 +122,16 @@ func (g *GeoLite2CountryMMDBOut) Output(container lib.Container) error {
 		}
 
 		if err := g.marshalData(writer, entry, extraInfo); err != nil {
-			return err
+			return fmt.Errorf("❌ [type %s | action %s] %w", g.Type, g.Action, err)
 		}
 
 		updated = true
 	}
 
 	if updated {
-		return g.writeFile(g.OutputName, writer)
+		if err := g.writeFile(g.OutputName, writer); err != nil {
+			return fmt.Errorf("❌ [type %s | action %s] %w", g.Type, g.Action, err)
+		}
 	}
 
 	return nil
@@ -139,7 +149,7 @@ func sourceDateEpoch() (int64, error) {
 	return epoch, nil
 }
 
-func (g *GeoLite2CountryMMDBOut) filterAndSortList(container lib.Container) []string {
+func (g *geolite2_country_mmdb_out) filterAndSortList(container lib.Container) []string {
 	/*
 		Note: The IPs and/or CIDRs of the latter list will overwrite those of the former one
 		when duplicated data found due to MaxMind mmdb file format constraint.
@@ -157,14 +167,22 @@ func (g *GeoLite2CountryMMDBOut) filterAndSortList(container lib.Container) []st
 		}
 	}
 
+	hasWantedList := false
 	wantList := make([]string, 0, len(g.Want))
 	for _, want := range g.Want {
-		if want = strings.ToUpper(strings.TrimSpace(want)); want != "" && !excludeMap[want] {
-			wantList = append(wantList, want)
+		if want = strings.ToUpper(strings.TrimSpace(want)); want != "" {
+			hasWantedList = true
+			if !excludeMap[want] {
+				wantList = append(wantList, want)
+			}
 		}
 	}
 
-	if len(wantList) > 0 {
+	if hasWantedList {
+		if len(wantList) == 0 {
+			return []string{}
+		}
+
 		return wantList
 	}
 
@@ -177,7 +195,7 @@ func (g *GeoLite2CountryMMDBOut) filterAndSortList(container lib.Container) []st
 		}
 	}
 
-	list := make([]string, 0, 300)
+	list := make([]string, 0, container.Len())
 	for entry := range container.Loop() {
 		name := entry.GetName()
 		if excludeMap[name] || overwriteMap[name] {
@@ -195,7 +213,7 @@ func (g *GeoLite2CountryMMDBOut) filterAndSortList(container lib.Container) []st
 	return list
 }
 
-func (g *GeoLite2CountryMMDBOut) marshalData(writer *mmdbwriter.Tree, entry *lib.Entry, extraInfo map[string]any) error {
+func (g *geolite2_country_mmdb_out) marshalData(writer *mmdbwriter.Tree, entry *lib.Entry, extraInfo map[string]any) error {
 	entryCidr, err := entry.MarshalText(lib.GetIgnoreIPType(g.OnlyIPType))
 	if err != nil {
 		return err
@@ -391,7 +409,7 @@ func (g *GeoLite2CountryMMDBOut) marshalData(writer *mmdbwriter.Tree, entry *lib
 	return nil
 }
 
-func (g *GeoLite2CountryMMDBOut) writeFile(filename string, writer *mmdbwriter.Tree) error {
+func (g *geolite2_country_mmdb_out) writeFile(filename string, writer *mmdbwriter.Tree) error {
 	if err := os.MkdirAll(g.OutputDir, 0755); err != nil {
 		return err
 	}

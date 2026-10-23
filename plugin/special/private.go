@@ -2,6 +2,7 @@ package special
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/Loyalsoldier/geoip/lib"
 )
@@ -38,57 +39,77 @@ var privateCIDRs = []string{
 
 func init() {
 	lib.RegisterInputConfigCreator(TypePrivate, func(action lib.Action, data json.RawMessage) (lib.InputConverter, error) {
-		return newPrivate(action, data)
+		return NewPrivateFromBytes(action, data)
 	})
-	lib.RegisterInputConverter(TypePrivate, &Private{
+	lib.RegisterInputConverter(TypePrivate, &private{
 		Description: DescPrivate,
 	})
 }
 
-func newPrivate(action lib.Action, data json.RawMessage) (lib.InputConverter, error) {
-	var tmp struct {
-		OnlyIPType lib.IPType `json:"onlyIPType"`
-	}
-
-	if len(data) > 0 {
-		if err := json.Unmarshal(data, &tmp); err != nil {
-			return nil, err
-		}
-	}
-
-	return &Private{
-		Type:        TypePrivate,
-		Action:      action,
-		Description: DescPrivate,
-		OnlyIPType:  tmp.OnlyIPType,
-	}, nil
-}
-
-type Private struct {
+type private struct {
 	Type        string
 	Action      lib.Action
 	Description string
 	OnlyIPType  lib.IPType
 }
 
-func (p *Private) GetType() string {
+func NewPrivate(action lib.Action, opts ...lib.InputOption) (lib.InputConverter, error) {
+	p := &private{
+		Type:        TypePrivate,
+		Action:      action,
+		Description: DescPrivate,
+	}
+
+	for _, opt := range opts {
+		if opt != nil {
+			opt(p)
+		}
+	}
+
+	return p, nil
+}
+
+func WithPrivateOnlyIPType(onlyIPType lib.IPType) lib.InputOption {
+	return func(p lib.InputConverter) {
+		p.(*private).OnlyIPType = onlyIPType
+	}
+}
+
+func NewPrivateFromBytes(action lib.Action, data []byte) (lib.InputConverter, error) {
+	var tmp struct {
+		OnlyIPType lib.IPType `json:"onlyIPType"`
+	}
+
+	if len(data) > 0 {
+		if err := json.Unmarshal(data, &tmp); err != nil {
+			return nil, fmt.Errorf("❌ [type %s | action %s] %w", TypePrivate, action, err)
+		}
+	}
+
+	return NewPrivate(
+		action,
+		WithPrivateOnlyIPType(tmp.OnlyIPType),
+	)
+}
+
+func (p *private) GetType() string {
 	return p.Type
 }
 
-func (p *Private) GetAction() lib.Action {
+func (p *private) GetAction() lib.Action {
 	return p.Action
 }
 
-func (p *Private) GetDescription() string {
+func (p *private) GetDescription() string {
 	return p.Description
 }
 
-func (p *Private) Input(container lib.Container) (lib.Container, error) {
+func (p *private) Input(container lib.Container) (lib.Container, error) {
 	entry := lib.NewEntry(entryNamePrivate)
 
 	for _, cidr := range privateCIDRs {
 		if err := entry.AddPrefix(cidr); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("❌ [type %s | action %s] %w", p.Type, p.Action, err)
 		}
 	}
 
@@ -97,14 +118,14 @@ func (p *Private) Input(container lib.Container) (lib.Container, error) {
 	switch p.Action {
 	case lib.ActionAdd:
 		if err := container.Add(entry, ignoreIPType); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("❌ [type %s | action %s] %w", p.Type, p.Action, err)
 		}
 	case lib.ActionRemove:
 		if err := container.Remove(entry, lib.CaseRemovePrefix, ignoreIPType); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("❌ [type %s | action %s] %w", p.Type, p.Action, err)
 		}
 	default:
-		return nil, lib.ErrUnknownAction
+		return nil, fmt.Errorf("❌ [type %s | action %s] %w", p.Type, p.Action, lib.ErrUnknownAction)
 	}
 
 	return container, nil

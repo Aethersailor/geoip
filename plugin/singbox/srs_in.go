@@ -21,57 +21,14 @@ const (
 
 func init() {
 	lib.RegisterInputConfigCreator(TypeSRSIn, func(action lib.Action, data json.RawMessage) (lib.InputConverter, error) {
-		return newSRSIn(action, data)
+		return NewSRSInFromBytes(action, data)
 	})
-	lib.RegisterInputConverter(TypeSRSIn, &SRSIn{
+	lib.RegisterInputConverter(TypeSRSIn, &srs_in{
 		Description: DescSRSIn,
 	})
 }
 
-func newSRSIn(action lib.Action, data json.RawMessage) (lib.InputConverter, error) {
-	var tmp struct {
-		Name       string     `json:"name"`
-		URI        string     `json:"uri"`
-		InputDir   string     `json:"inputDir"`
-		Want       []string   `json:"wantedList"`
-		OnlyIPType lib.IPType `json:"onlyIPType"`
-	}
-
-	if len(data) > 0 {
-		if err := json.Unmarshal(data, &tmp); err != nil {
-			return nil, err
-		}
-	}
-
-	if tmp.Name == "" && tmp.URI == "" && tmp.InputDir == "" {
-		return nil, fmt.Errorf("❌ [type %s | action %s] missing inputdir or name or uri", TypeSRSIn, action)
-	}
-
-	if (tmp.Name != "" && tmp.URI == "") || (tmp.Name == "" && tmp.URI != "") {
-		return nil, fmt.Errorf("❌ [type %s | action %s] name & uri must be specified together", TypeSRSIn, action)
-	}
-
-	// Filter want list
-	wantList := make(map[string]bool)
-	for _, want := range tmp.Want {
-		if want = strings.ToUpper(strings.TrimSpace(want)); want != "" {
-			wantList[want] = true
-		}
-	}
-
-	return &SRSIn{
-		Type:        TypeSRSIn,
-		Action:      action,
-		Description: DescSRSIn,
-		Name:        tmp.Name,
-		URI:         tmp.URI,
-		InputDir:    tmp.InputDir,
-		Want:        wantList,
-		OnlyIPType:  tmp.OnlyIPType,
-	}, nil
-}
-
-type SRSIn struct {
+type srs_in struct {
 	Type        string
 	Action      lib.Action
 	Description string
@@ -82,19 +39,99 @@ type SRSIn struct {
 	OnlyIPType  lib.IPType
 }
 
-func (s *SRSIn) GetType() string {
+func NewSRSIn(action lib.Action, opts ...lib.InputOption) (lib.InputConverter, error) {
+	s := &srs_in{
+		Type:        TypeSRSIn,
+		Action:      action,
+		Description: DescSRSIn,
+	}
+
+	for _, opt := range opts {
+		if opt != nil {
+			opt(s)
+		}
+	}
+
+	if s.Name == "" && s.URI == "" && s.InputDir == "" {
+		return nil, fmt.Errorf("❌ [type %s | action %s] missing name or uri or inputDir", s.Type, s.Action)
+	}
+
+	if (s.Name != "" && s.URI == "") || (s.Name == "" && s.URI != "") {
+		return nil, fmt.Errorf("❌ [type %s | action %s] name and uri must be specified together", s.Type, s.Action)
+	}
+
+	return s, nil
+}
+
+func WithNameAndURI(name, uri string) lib.InputOption {
+	return func(s lib.InputConverter) {
+		s.(*srs_in).Name = strings.TrimSpace(name)
+		s.(*srs_in).URI = strings.TrimSpace(uri)
+	}
+}
+
+func WithInputDir(dir string) lib.InputOption {
+	return func(s lib.InputConverter) {
+		s.(*srs_in).InputDir = strings.TrimSpace(dir)
+	}
+}
+
+func WithInputWantedList(lists []string) lib.InputOption {
+	return func(s lib.InputConverter) {
+		wantList := make(map[string]bool)
+		for _, want := range lists {
+			if want = strings.ToUpper(strings.TrimSpace(want)); want != "" {
+				wantList[want] = true
+			}
+		}
+
+		s.(*srs_in).Want = wantList
+	}
+}
+
+func WithInputOnlyIPType(onlyIPType lib.IPType) lib.InputOption {
+	return func(s lib.InputConverter) {
+		s.(*srs_in).OnlyIPType = onlyIPType
+	}
+}
+
+func NewSRSInFromBytes(action lib.Action, data []byte) (lib.InputConverter, error) {
+	var tmp struct {
+		Name       string     `json:"name"`
+		URI        string     `json:"uri"`
+		InputDir   string     `json:"inputDir"`
+		Want       []string   `json:"wantedList"`
+		OnlyIPType lib.IPType `json:"onlyIPType"`
+	}
+
+	if len(data) > 0 {
+		if err := json.Unmarshal(data, &tmp); err != nil {
+			return nil, fmt.Errorf("❌ [type %s | action %s] %w", TypeSRSIn, action, err)
+		}
+	}
+
+	return NewSRSIn(
+		action,
+		WithNameAndURI(tmp.Name, tmp.URI),
+		WithInputDir(tmp.InputDir),
+		WithInputWantedList(tmp.Want),
+		WithInputOnlyIPType(tmp.OnlyIPType),
+	)
+}
+
+func (s *srs_in) GetType() string {
 	return s.Type
 }
 
-func (s *SRSIn) GetAction() lib.Action {
+func (s *srs_in) GetAction() lib.Action {
 	return s.Action
 }
 
-func (s *SRSIn) GetDescription() string {
+func (s *srs_in) GetDescription() string {
 	return s.Description
 }
 
-func (s *SRSIn) Input(container lib.Container) (lib.Container, error) {
+func (s *srs_in) Input(container lib.Container) (lib.Container, error) {
 	entries := make(map[string]*lib.Entry)
 	var err error
 
@@ -113,7 +150,7 @@ func (s *SRSIn) Input(container lib.Container) (lib.Container, error) {
 	}
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("❌ [type %s | action %s] %w", s.Type, s.Action, err)
 	}
 
 	if len(entries) == 0 {
@@ -126,21 +163,21 @@ func (s *SRSIn) Input(container lib.Container) (lib.Container, error) {
 		switch s.Action {
 		case lib.ActionAdd:
 			if err := container.Add(entry, ignoreIPType); err != nil {
-				return nil, err
+				return nil, fmt.Errorf("❌ [type %s | action %s] %w", s.Type, s.Action, err)
 			}
 		case lib.ActionRemove:
 			if err := container.Remove(entry, lib.CaseRemovePrefix, ignoreIPType); err != nil {
-				return nil, err
+				return nil, fmt.Errorf("❌ [type %s | action %s] %w", s.Type, s.Action, err)
 			}
 		default:
-			return nil, lib.ErrUnknownAction
+			return nil, fmt.Errorf("❌ [type %s | action %s] %w", s.Type, s.Action, lib.ErrUnknownAction)
 		}
 	}
 
 	return container, nil
 }
 
-func (s *SRSIn) walkDir(dir string, entries map[string]*lib.Entry) error {
+func (s *srs_in) walkDir(dir string, entries map[string]*lib.Entry) error {
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -159,7 +196,7 @@ func (s *SRSIn) walkDir(dir string, entries map[string]*lib.Entry) error {
 	return err
 }
 
-func (s *SRSIn) walkLocalFile(path, name string, entries map[string]*lib.Entry) error {
+func (s *srs_in) walkLocalFile(path, name string, entries map[string]*lib.Entry) error {
 	entryName := ""
 	name = strings.TrimSpace(name)
 	if name != "" {
@@ -169,7 +206,7 @@ func (s *SRSIn) walkLocalFile(path, name string, entries map[string]*lib.Entry) 
 
 		// check filename
 		if !regexp.MustCompile(`^[a-zA-Z0-9_.\-]+$`).MatchString(entryName) {
-			return fmt.Errorf("❌ [type %s | action %s] filename %s cannot be entry name, please remove special characters in it", s.Type, s.Action, entryName)
+			return fmt.Errorf("filename %s cannot be entry name, please remove special characters in it", entryName)
 		}
 
 		// remove file extension but not hidden files of which filename starts with "."
@@ -181,7 +218,7 @@ func (s *SRSIn) walkLocalFile(path, name string, entries map[string]*lib.Entry) 
 
 	entryName = strings.ToUpper(entryName)
 	if _, found := entries[entryName]; found {
-		return fmt.Errorf("❌ [type %s | action %s] found duplicated list %s", s.Type, s.Action, entryName)
+		return fmt.Errorf("found duplicated list %s", entryName)
 	}
 
 	file, err := os.Open(path)
@@ -197,7 +234,7 @@ func (s *SRSIn) walkLocalFile(path, name string, entries map[string]*lib.Entry) 
 	return nil
 }
 
-func (s *SRSIn) walkRemoteFile(url, name string, entries map[string]*lib.Entry) error {
+func (s *srs_in) walkRemoteFile(url, name string, entries map[string]*lib.Entry) error {
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
@@ -205,7 +242,7 @@ func (s *SRSIn) walkRemoteFile(url, name string, entries map[string]*lib.Entry) 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("❌ [type %s | action %s] failed to get remote file %s, http status code %d", s.Type, s.Action, url, resp.StatusCode)
+		return fmt.Errorf("failed to get remote file %s, http status code %d", url, resp.StatusCode)
 	}
 
 	if err := s.generateEntries(name, resp.Body, entries); err != nil {
@@ -215,7 +252,7 @@ func (s *SRSIn) walkRemoteFile(url, name string, entries map[string]*lib.Entry) 
 	return nil
 }
 
-func (s *SRSIn) generateEntries(name string, reader io.Reader, entries map[string]*lib.Entry) error {
+func (s *srs_in) generateEntries(name string, reader io.Reader, entries map[string]*lib.Entry) error {
 	name = strings.ToUpper(name)
 
 	if len(s.Want) > 0 && !s.Want[name] {

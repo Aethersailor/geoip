@@ -50,7 +50,7 @@ func (c *container) Len() int {
 }
 
 func (c *container) Loop() <-chan *Entry {
-	ch := make(chan *Entry, len(c.entries))
+	ch := make(chan *Entry, c.Len())
 	for _, val := range c.entries {
 		ch <- val
 	}
@@ -231,7 +231,14 @@ func (c *container) Lookup(ipOrCidr string, searchList ...string) ([]string, boo
 		if err != nil {
 			return nil, false, err
 		}
-		addr := prefix.Addr().Unmap()
+		addr := prefix.Addr()
+		if addr.Is4In6() { // IPv4-mapped IPv6 CIDR
+			if prefix.Bits() < 96 {
+				return nil, false, ErrInvalidCIDR
+			}
+			addr = addr.Unmap()
+			prefix = netip.PrefixFrom(addr, prefix.Bits()-96)
+		}
 		switch {
 		case addr.Is4():
 			return c.lookup(prefix, IPv4, searchList...)

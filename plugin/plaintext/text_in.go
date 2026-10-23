@@ -19,98 +19,34 @@ const (
 
 func init() {
 	lib.RegisterInputConfigCreator(TypeTextIn, func(action lib.Action, data json.RawMessage) (lib.InputConverter, error) {
-		return newTextIn(TypeTextIn, DescTextIn, action, data)
+		return NewTextInFromBytes(action, data)
 	})
-	lib.RegisterInputConverter(TypeTextIn, &TextIn{
+	lib.RegisterInputConverter(TypeTextIn, &text_in{
 		Description: DescTextIn,
 	})
 }
 
-func newTextIn(iType string, iDesc string, action lib.Action, data json.RawMessage) (lib.InputConverter, error) {
-	var tmp struct {
-		Name       string     `json:"name"`
-		URI        string     `json:"uri"`
-		URIList    []string   `json:"uriList"`
-		IPOrCIDR   []string   `json:"ipOrCIDR"`
-		InputDir   string     `json:"inputDir"`
-		Want       []string   `json:"wantedList"`
-		OnlyIPType lib.IPType `json:"onlyIPType"`
-		Optional   bool       `json:"optional"`
-
-		JSONPath             []string `json:"jsonPath"`
-		RemovePrefixesInLine []string `json:"removePrefixesInLine"`
-		RemoveSuffixesInLine []string `json:"removeSuffixesInLine"`
-	}
-
-	if strings.TrimSpace(iType) == "" {
-		return nil, fmt.Errorf("type is required")
-	}
-
-	if len(data) > 0 {
-		if err := json.Unmarshal(data, &tmp); err != nil {
-			return nil, err
-		}
-	}
-
-	if iType != TypeTextIn && len(tmp.IPOrCIDR) > 0 {
-		return nil, fmt.Errorf("❌ [type %s | action %s] ipOrCIDR is invalid for this input format", iType, action)
-	}
-
-	if iType == TypeJSONIn && len(tmp.JSONPath) == 0 {
-		return nil, fmt.Errorf("❌ [type %s | action %s] missing jsonPath", iType, action)
-	}
-
-	if tmp.InputDir == "" {
-		if tmp.Name == "" {
-			return nil, fmt.Errorf("❌ [type %s | action %s] missing inputDir or name", iType, action)
-		}
-		if tmp.URI == "" && len(tmp.URIList) == 0 && len(tmp.IPOrCIDR) == 0 {
-			return nil, fmt.Errorf("❌ [type %s | action %s] missing uri or uriList or ipOrCIDR", iType, action)
-		}
-	} else if tmp.Name != "" || tmp.URI != "" || len(tmp.URIList) > 0 || len(tmp.IPOrCIDR) > 0 {
-		return nil, fmt.Errorf("❌ [type %s | action %s] inputDir is not allowed to be used with name or uri or uriList or ipOrCIDR", iType, action)
-	}
-
-	// Filter want list
-	wantList := make(map[string]bool)
-	for _, want := range tmp.Want {
-		if want = strings.ToUpper(strings.TrimSpace(want)); want != "" {
-			wantList[want] = true
-		}
-	}
-
-	return &TextIn{
-		Type:        iType,
-		Action:      action,
-		Description: iDesc,
-		Name:        tmp.Name,
-		URI:         tmp.URI,
-		URIList:     tmp.URIList,
-		IPOrCIDR:    tmp.IPOrCIDR,
-		InputDir:    tmp.InputDir,
-		Want:        wantList,
-		OnlyIPType:  tmp.OnlyIPType,
-		Optional:    tmp.Optional,
-
-		JSONPath:             tmp.JSONPath,
-		RemovePrefixesInLine: tmp.RemovePrefixesInLine,
-		RemoveSuffixesInLine: tmp.RemoveSuffixesInLine,
-	}, nil
+func NewTextIn(action lib.Action, opts ...lib.InputOption) (lib.InputConverter, error) {
+	return newTextIn(TypeTextIn, DescTextIn, action, opts...)
 }
 
-func (t *TextIn) GetType() string {
+func NewTextInFromBytes(action lib.Action, data []byte) (lib.InputConverter, error) {
+	return newTextInFromBytes(TypeTextIn, DescTextIn, action, data)
+}
+
+func (t *text_in) GetType() string {
 	return t.Type
 }
 
-func (t *TextIn) GetAction() lib.Action {
+func (t *text_in) GetAction() lib.Action {
 	return t.Action
 }
 
-func (t *TextIn) GetDescription() string {
+func (t *text_in) GetDescription() string {
 	return t.Description
 }
 
-func (t *TextIn) Input(container lib.Container) (lib.Container, error) {
+func (t *text_in) Input(container lib.Container) (lib.Container, error) {
 	entries := make(map[string]*lib.Entry)
 	var err error
 
@@ -122,9 +58,10 @@ func (t *TextIn) Input(container lib.Container) (lib.Container, error) {
 		err = t.walkFileCandidates(t.Name, entries)
 		if err != nil {
 			if !t.Optional {
-				return nil, err
+				return nil, fmt.Errorf("❌ [type %s | action %s] %w", t.Type, t.Action, err)
 			}
 			log.Printf("⚠️ [type %s | action %s] skip optional source for list %s: %s", t.Type, t.Action, strings.ToUpper(strings.TrimSpace(t.Name)), err)
+			err = nil
 		}
 
 		if len(t.IPOrCIDR) > 0 {
@@ -139,7 +76,7 @@ func (t *TextIn) Input(container lib.Container) (lib.Container, error) {
 	}
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("❌ [type %s | action %s] %w", t.Type, t.Action, err)
 	}
 
 	ignoreIPType := lib.GetIgnoreIPType(t.OnlyIPType)
@@ -156,21 +93,21 @@ func (t *TextIn) Input(container lib.Container) (lib.Container, error) {
 		switch t.Action {
 		case lib.ActionAdd:
 			if err := container.Add(entry, ignoreIPType); err != nil {
-				return nil, err
+				return nil, fmt.Errorf("❌ [type %s | action %s] %w", t.Type, t.Action, err)
 			}
 		case lib.ActionRemove:
 			if err := container.Remove(entry, lib.CaseRemovePrefix, ignoreIPType); err != nil {
-				return nil, err
+				return nil, fmt.Errorf("❌ [type %s | action %s] %w", t.Type, t.Action, err)
 			}
 		default:
-			return nil, lib.ErrUnknownAction
+			return nil, fmt.Errorf("❌ [type %s | action %s] %w", t.Type, t.Action, lib.ErrUnknownAction)
 		}
 	}
 
 	return container, nil
 }
 
-func (t *TextIn) walkDir(dir string, entries map[string]*lib.Entry) error {
+func (t *text_in) walkDir(dir string, entries map[string]*lib.Entry) error {
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -189,7 +126,7 @@ func (t *TextIn) walkDir(dir string, entries map[string]*lib.Entry) error {
 	return err
 }
 
-func (t *TextIn) getSourceList() []string {
+func (t *text_in) getSourceList() []string {
 	list := make([]string, 0, 1+len(t.URIList))
 	seen := make(map[string]bool, 1+len(t.URIList))
 
@@ -211,7 +148,7 @@ func (t *TextIn) getSourceList() []string {
 	return list
 }
 
-func (t *TextIn) walkFile(pathOrURL, name string, entries map[string]*lib.Entry) error {
+func (t *text_in) walkFile(pathOrURL, name string, entries map[string]*lib.Entry) error {
 	switch {
 	case strings.HasPrefix(strings.ToLower(pathOrURL), "http://"), strings.HasPrefix(strings.ToLower(pathOrURL), "https://"):
 		return t.walkRemoteFile(pathOrURL, name, entries)
@@ -220,7 +157,7 @@ func (t *TextIn) walkFile(pathOrURL, name string, entries map[string]*lib.Entry)
 	}
 }
 
-func (t *TextIn) walkFileCandidates(name string, entries map[string]*lib.Entry) error {
+func (t *text_in) walkFileCandidates(name string, entries map[string]*lib.Entry) error {
 	sources := t.getSourceList()
 	if len(sources) == 0 {
 		return fmt.Errorf("❌ [type %s | action %s] missing uri or uriList", t.Type, t.Action)
@@ -238,7 +175,7 @@ func (t *TextIn) walkFileCandidates(name string, entries map[string]*lib.Entry) 
 	return fmt.Errorf("❌ [type %s | action %s] failed to load all sources for %s: %w", t.Type, t.Action, strings.ToUpper(strings.TrimSpace(name)), lastErr)
 }
 
-func (t *TextIn) walkLocalFile(path, name string, entries map[string]*lib.Entry) error {
+func (t *text_in) walkLocalFile(path, name string, entries map[string]*lib.Entry) error {
 	entryName := ""
 	name = strings.TrimSpace(name)
 	if name != "" {
@@ -248,7 +185,7 @@ func (t *TextIn) walkLocalFile(path, name string, entries map[string]*lib.Entry)
 
 		// check filename
 		if !regexp.MustCompile(`^[a-zA-Z0-9_.\-]+$`).MatchString(entryName) {
-			return fmt.Errorf("❌ [type %s | action %s] filename %s cannot be entry name, please remove special characters in it", t.Type, t.Action, entryName)
+			return fmt.Errorf("filename %s cannot be entry name, please remove special characters in it", entryName)
 		}
 
 		// remove file extension but not hidden files of which filename starts with "."
@@ -264,7 +201,7 @@ func (t *TextIn) walkLocalFile(path, name string, entries map[string]*lib.Entry)
 		return nil
 	}
 	if _, found := entries[entryName]; found {
-		return fmt.Errorf("❌ [type %s | action %s] found duplicated list %s", t.Type, t.Action, entryName)
+		return fmt.Errorf("found duplicated list %s", entryName)
 	}
 
 	entry := lib.NewEntry(entryName)
@@ -282,7 +219,7 @@ func (t *TextIn) walkLocalFile(path, name string, entries map[string]*lib.Entry)
 	return nil
 }
 
-func (t *TextIn) walkRemoteFile(url, name string, entries map[string]*lib.Entry) error {
+func (t *text_in) walkRemoteFile(url, name string, entries map[string]*lib.Entry) error {
 	name = strings.ToUpper(name)
 	if len(t.Want) > 0 && !t.Want[name] {
 		return nil
@@ -304,7 +241,11 @@ func (t *TextIn) walkRemoteFile(url, name string, entries map[string]*lib.Entry)
 	return nil
 }
 
-func (t *TextIn) appendIPOrCIDR(ipOrCIDR []string, name string, entries map[string]*lib.Entry) error {
+func (t *text_in) appendIPOrCIDR(ipOrCIDR []string, name string, entries map[string]*lib.Entry) error {
+	if len(ipOrCIDR) == 0 {
+		return nil
+	}
+
 	name = strings.ToUpper(name)
 
 	entry, found := entries[name]
