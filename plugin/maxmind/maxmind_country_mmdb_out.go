@@ -418,9 +418,11 @@ func (g *geolite2_country_mmdb_out) writeFile(filename string, writer *mmdbwrite
 	if err != nil {
 		return err
 	}
-	defer f.Close()
 
 	_, err = writer.WriteTo(f)
+	if closeErr := f.Close(); err == nil {
+		err = closeErr
+	}
 	if err != nil {
 		return err
 	}
